@@ -77,7 +77,10 @@ public class CreateJsonFileQuickFix
 			});
 		} catch(RuntimeException err)
 		{
-			LOG.warn("Side effects are currently disallowed, soft-failing.", err);
+			if(err.getMessage().contains("INVOKE_LATER"))
+				LOG.info("Side effects are currently disallowed, soft-failing.");
+			else
+				throw err;
 		}
 	}
 	

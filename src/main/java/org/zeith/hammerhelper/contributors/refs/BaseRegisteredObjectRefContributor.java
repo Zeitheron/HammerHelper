@@ -12,8 +12,6 @@ import org.zeith.hammerhelper.utils.*;
 import java.util.Set;
 import java.util.function.Consumer;
 
-import static org.zeith.hammerhelper.utils.FileHelper.getRecursive;
-
 public abstract class BaseRegisteredObjectRefContributor
 		extends ToVirtualFilesRefContributor
 {
@@ -31,7 +29,6 @@ public abstract class BaseRegisteredObjectRefContributor
 	{
 		var field = getAnnotationContext(element);
 		if(field == null) return;
-		Project project = element.getProject();
 		
 		var registryPath = SimplyRegisterMechanism.getRegistryPath(field);
 		if(registryPath == null) return;
@@ -56,8 +53,7 @@ public abstract class BaseRegisteredObjectRefContributor
 	
 	protected void forEachAssetsNamespace(PsiElement element, Consumer<VirtualFile> namespaceHandler)
 	{
-		VirtualFile assets = getRecursive(FileHelper.getResourcesDirectory(element.getProject()), "assets");
-		if(assets == null) return;
-		for(var namespace : assets.getChildren()) namespaceHandler.accept(namespace);
+		for(var namespace : FileHelper.getAllAssetNamespaces(element.getProject()))
+			namespaceHandler.accept(namespace.file());
 	}
 }

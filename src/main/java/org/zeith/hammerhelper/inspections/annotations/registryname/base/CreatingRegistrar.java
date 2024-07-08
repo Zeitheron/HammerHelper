@@ -9,6 +9,8 @@ import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.quickfixes.CreateJsonFileQuickFix;
 import org.zeith.hammerhelper.utils.*;
 
+import java.io.File;
+import java.util.List;
 import java.util.Map;
 
 import static org.zeith.hammerhelper.utils.FileHelper.getRecursive;
@@ -54,23 +56,24 @@ public abstract class CreatingRegistrar
 				var fn = (registryPath + ".json").split("/");
 				
 				var ap = tg.getAssetsPath();
-				for(VirtualFile namespace : namespaces)
+				for(var namespace : namespaces)
 				{
-					var sub = getRecursive(namespace, ap.split("/"));
+					var sub = getRecursive(namespace.file(), ap.split("/"));
 					if(sub == null) continue;
 					sub = getRecursive(sub, fn);
 					if(sub != null) return;
 				}
 				
-				LocalQuickFix[] fixes = new LocalQuickFix[namespaces.length];
+				LocalQuickFix[] fixes = new LocalQuickFix[namespaces.size()];
 				
-				for(int i = 0, namespacesLength = namespaces.length; i < namespacesLength; i++)
+				for(int i = 0, namespacesLength = namespaces.size(); i < namespacesLength; i++)
 				{
-					VirtualFile namespaceVF = namespaces[i];
-					var namespace = namespaceVF.getName();
+					var ns = namespaces.get(i);
+					VirtualFile namespaceVF = ns.file();
+					var namespace = ns.name();
 					fixes[i] = new CreateJsonFileQuickFix(getQuickFixLabel(namespace, registryPath, qn, tg), tg.createTemplate(namespace, registryPath, aField), 0, (project, requestor) ->
 					{
-						String directoryPath = project.getBasePath() + "/" + FileHelper.getSrcMainResourcesChild(project) + "/assets/" + namespace + "/" + ap + "/" + registryPath + ".json";
+						String directoryPath = namespaceVF.toNioPath().toAbsolutePath().toString().replace(File.separatorChar, '/') + "/" + ap + "/" + registryPath + ".json";
 						int lastIdx = directoryPath.lastIndexOf('/');
 						FileHelper.getResourcesDirectory(project);
 						VirtualFile directory = VfsUtil.createDirectories(directoryPath.substring(0, lastIdx));
@@ -83,11 +86,9 @@ public abstract class CreatingRegistrar
 		};
 	}
 	
-	protected VirtualFile[] getAssetNamespaces(PsiElement element)
+	protected List<Namespace> getAssetNamespaces(PsiElement element)
 	{
-		VirtualFile assets = getRecursive(FileHelper.getResourcesDirectory(element.getProject()), "assets");
-		if(assets == null) return new VirtualFile[0];
-		return assets.getChildren();
+		return FileHelper.getAllAssetNamespaces(element.getProject());
 	}
 	
 	public interface TemplateGenerator

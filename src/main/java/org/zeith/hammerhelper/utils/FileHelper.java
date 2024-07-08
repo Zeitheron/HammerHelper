@@ -2,7 +2,10 @@ package org.zeith.hammerhelper.utils;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
+import org.zeith.hammerhelper.HammerHelper;
 
+import java.nio.file.Path;
 import java.util.*;
 
 public class FileHelper
@@ -18,6 +21,26 @@ public class FileHelper
 		VirtualFile resourcesDir = baseDir.findFileByRelativePath(getSrcMainResourcesChild(project));
 		if(resourcesDir == null) resourcesDir = baseDir.findChild("resources");
 		return resourcesDir;
+	}
+	
+	public static List<Namespace> getAllAssetNamespaces(Project project)
+	{
+		var cfg = HammerHelper.cfg(project);
+		
+		List<Namespace> namespaces = new ArrayList<>();
+		
+		if(cfg != null && cfg.getNamespaces() != null)
+			for(var namespace : cfg.getNamespaces().entrySet())
+			{
+				var vf = VirtualFileManager.getInstance().findFileByNioPath(Path.of(namespace.getKey()));
+				if(vf == null) continue;
+				namespaces.add(new Namespace(namespace.getValue(), vf));
+			}
+		
+		var assets = getRecursive(getResourcesDirectory(project), "assets");
+		if(assets != null) for(VirtualFile child : assets.getChildren()) namespaces.add(new Namespace(child.getName(), child));
+		
+		return namespaces;
 	}
 	
 	public static VirtualFile getRecursive(VirtualFile directory, String... path)
