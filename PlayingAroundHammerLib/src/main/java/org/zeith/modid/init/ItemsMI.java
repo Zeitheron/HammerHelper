@@ -11,7 +11,7 @@ import org.zeith.hammerlib.annotations.SimplyRegister;
 import org.zeith.hammerlib.util.mcf.Resources;
 import org.zeith.modid.ModId;
 
-@SimplyRegister(prefix = "")
+@SimplyRegister
 public interface ItemsMI
 {
 	@RegistryName("test")

@@ -7,10 +7,15 @@ import java.util.*;
 
 public class FileHelper
 {
+	public static String getSrcMainResourcesChild(Project project)
+	{
+		return "src/main/resources";
+	}
+	
 	public static VirtualFile getResourcesDirectory(Project project)
 	{
 		VirtualFile baseDir = project.getBaseDir();
-		VirtualFile resourcesDir = baseDir.findFileByRelativePath("src/main/resources");
+		VirtualFile resourcesDir = baseDir.findFileByRelativePath(getSrcMainResourcesChild(project));
 		if(resourcesDir == null) resourcesDir = baseDir.findChild("resources");
 		return resourcesDir;
 	}
