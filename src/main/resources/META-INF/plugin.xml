@@ -1,0 +1,49 @@
+<idea-plugin>
+    <id>org.zeith.hammerhelper</id>
+    <name>HammerHelper</name>
+    <vendor email="business@zeith.org" url="https://mcdoc.zeith.org/">Zeitheron</vendor>
+
+    <!-- Description of the plugin displayed on the Plugin Page and IDE Plugin Manager.
+         Simple HTML elements (text formatting, paragraphs, and lists) can be added inside of <![CDATA[ ]]> tag.
+         Guidelines: https://plugins.jetbrains.com/docs/marketplace/plugin-overview-page.html#plugin-description -->
+    <description><![CDATA[
+    Helper plugin to assist with Zeith's Hammer library set validation.
+  ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.java</depends>
+
+    <!-- Extension points defined by the plugin.
+         Read more: https://plugins.jetbrains.com/docs/intellij/plugin-extension-points.html -->
+    <extensions defaultExtensionNs="com.intellij">
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.simplyregister.InvalidPrefixSimplyRegister"
+                         id="SimplyRegisterInvalidPrefix"
+                         displayName="Non [a-z0-9/._-] character in prefix."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.InvalidValueRegistryName"
+                         id="RegistryNameInvalid"
+                         displayName="Non [a-z0-9/._-] character in registry name."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.simplyregister.NonInterfaceSimplyRegister"
+                         id="SimplyRegisterNonInterfaceClass"
+                         displayName="@SimplyRegister-annotated classes should be interfaces."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.methods.ResourcesInspector"
+                         id="HLResourcesInspector"
+                         displayName="HammerLib's Resources sanity checks."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
+<!--        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>-->
+    </extensions>
+</idea-plugin>
