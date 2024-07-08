@@ -48,7 +48,7 @@ public abstract class BaseRegisteredObjectRefContributor
 		   && modList.getParent() instanceof PsiField field)
 		{
 			var cls = PsiTypesUtil.getPsiClass(field.getType());
-			return cls != null && registrationTypes.contains(cls.getQualifiedName()) ? field : null;
+			return PsiHelper.instanceOf(cls, registrationTypes) ? field : null;
 		}
 		
 		return null;

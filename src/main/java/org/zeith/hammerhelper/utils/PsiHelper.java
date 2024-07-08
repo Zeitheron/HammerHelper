@@ -3,8 +3,31 @@ package org.zeith.hammerhelper.utils;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.*;
+
 public class PsiHelper
 {
+	public static boolean instanceOf(PsiClass psiClass, Set<String> possibleTypes)
+	{
+		if(psiClass == null) return false;
+		if(possibleTypes.contains(psiClass.getQualifiedName())) return true;
+		return instanceOf(psiClass.getSuperClass(), possibleTypes)
+			   || Arrays.stream(psiClass.getInterfaces()).anyMatch(itf -> instanceOf(itf, possibleTypes));
+	}
+	
+	public static String findInstance(PsiClass psiClass, Set<String> possibleTypes)
+	{
+		if(psiClass == null) return null;
+		if(possibleTypes.contains(psiClass.getQualifiedName())) return psiClass.getQualifiedName();
+		var qn = findInstance(psiClass.getSuperClass(), possibleTypes);
+		if(qn != null) return qn;
+		return Arrays.stream(psiClass.getInterfaces())
+				.map(itf -> findInstance(itf, possibleTypes))
+				.filter(Objects::nonNull)
+				.findFirst()
+				.orElse(null);
+	}
+	
 	public static @Nullable PsiAnnotation findFirstAnnotation(PsiModifierListOwner element, String... annotations)
 	{
 		for(String an : annotations)

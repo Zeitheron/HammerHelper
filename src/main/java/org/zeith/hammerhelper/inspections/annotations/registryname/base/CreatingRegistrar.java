@@ -7,8 +7,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTypesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.quickfixes.CreateJsonFileQuickFix;
-import org.zeith.hammerhelper.utils.FileHelper;
-import org.zeith.hammerhelper.utils.SimplyRegisterMechanism;
+import org.zeith.hammerhelper.utils.*;
 
 import java.util.Map;
 
@@ -38,7 +37,8 @@ public abstract class CreatingRegistrar
 			{
 				var cls = PsiTypesUtil.getPsiClass(aField.getType());
 				if(cls == null) return;
-				var qn = cls.getQualifiedName();
+				var qn = PsiHelper.findInstance(cls, templateGenerators.keySet());
+				if(qn == null) return;
 				var tg = templateGenerators.get(qn);
 				if(tg == null) return;
 				

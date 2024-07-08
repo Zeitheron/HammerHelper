@@ -88,7 +88,7 @@ public abstract class BaseHammerAnimsContrib
 		   && modList.getParent() instanceof PsiField field)
 		{
 			var cls = PsiTypesUtil.getPsiClass(field.getType());
-			return cls != null && registrationType.equals(cls.getQualifiedName()) ? field : null;
+			return PsiHelper.instanceOf(cls, Set.of(registrationType)) ? field : null;
 		}
 		
 		return null;
