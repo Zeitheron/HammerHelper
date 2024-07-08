@@ -44,6 +44,16 @@
                          groupName="HammerLib"
                          language="JAVA"/>
 
-<!--        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>-->
+        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.ItemModelRefContrib" language="JAVA"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.BlockStateRefContrib" language="JAVA"/>
+
+        <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammeranims.AnimationContrib" language="JAVA"/>
+        <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammeranims.GeometryContrib" language="JAVA"/>
+        <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammeranims.ParticleContrib" language="JAVA"/>
+
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammeranims.ref.AnimationRefs" language="JAVA"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammeranims.ref.GeoRefs" language="JAVA"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammeranims.ref.ParticleRefs" language="JAVA"/>
     </extensions>
 </idea-plugin>

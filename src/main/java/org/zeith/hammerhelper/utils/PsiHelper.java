@@ -56,4 +56,14 @@ public class PsiHelper
 		}
 		return defaultValue;
 	}
+	
+	public static boolean isOneOf(PsiAnnotation annotation, String... names)
+	{
+		var qn = annotation.getQualifiedName();
+		if(qn == null) return false;
+		for(String name : names)
+			if(qn.equals(name))
+				return true;
+		return false;
+	}
 }

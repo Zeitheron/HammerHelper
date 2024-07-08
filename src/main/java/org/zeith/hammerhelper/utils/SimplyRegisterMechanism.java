@@ -1,7 +1,6 @@
 package org.zeith.hammerhelper.utils;
 
-import com.intellij.psi.PsiAnnotation;
-import com.intellij.psi.PsiModifierListOwner;
+import com.intellij.psi.*;
 import org.jetbrains.annotations.Nullable;
 
 public class SimplyRegisterMechanism
@@ -24,5 +23,22 @@ public class SimplyRegisterMechanism
 	public static @Nullable PsiAnnotation findRegistryName(PsiModifierListOwner element)
 	{
 		return PsiHelper.findFirstAnnotation(element, REGISTRY_NAME);
+	}
+	
+	public static @Nullable String getRegistryPath(PsiField field)
+	{
+		var prefix = "";
+		if(field.getParent() instanceof PsiClass psiClass)
+		{
+			var sr = SimplyRegisterMechanism.findSimplyRegister(psiClass);
+			var v = PsiHelper.getAnnotationAttributeValue(sr, "prefix", "");
+			if(v != null) prefix = v;
+		}
+		
+		var rn = SimplyRegisterMechanism.findRegistryName(field);
+		var rnStr = PsiHelper.getAnnotationAttributeValue(rn, "value", "");
+		if(rnStr == null || rnStr.isBlank()) return null;
+		
+		return prefix + rnStr;
 	}
 }
