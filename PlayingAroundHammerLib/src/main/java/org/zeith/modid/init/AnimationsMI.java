@@ -12,6 +12,12 @@ public interface AnimationsMI {
     @RegistryName("test_np")
     IAnimationContainer TEST_2 = IAnimationContainer.createNoSuffix();
 
+    @RegistryName("test_np")
+    IAnimationContainer TEST_3 = IAnimationContainer.createNoSuffix();
+
+    @RegistryName("test_np")
+    IAnimationContainer TEST_4 = IAnimationContainer.createNoSuffix();
+
     @SimplyRegister(prefix = "sub/")
     interface SubAnimations {
         @RegistryName("test_np_sub")

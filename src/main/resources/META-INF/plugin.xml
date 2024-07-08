@@ -58,6 +58,13 @@
                          groupName="HammerLib"
                          language="JAVA"/>
 
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.DuplicateRegistryNames"
+                         id="HLDuplicateRegistryName"
+                         displayName=""
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
         <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.ItemModelRefContrib" language="JAVA"/>
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.BlockStateRefContrib" language="JAVA"/>

@@ -73,8 +73,12 @@ public class PsiHelper
 		if(value instanceof PsiReferenceExpression referenceExpression)
 		{
 			var elem = referenceExpression.resolve();
-			if(elem instanceof PsiField psf && psf.computeConstantValue() instanceof String str)
-				return str;
+			if(elem instanceof PsiField psf)
+			{
+				var obj = psf.computeConstantValue();
+				if(obj instanceof String str) return str;
+				if(obj instanceof PsiAnnotationMemberValue amv) return getExpressionStringRepresentation(amv, defaultValue);
+			}
 			return defaultValue;
 		}
 		return defaultValue;
