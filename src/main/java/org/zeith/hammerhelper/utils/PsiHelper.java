@@ -4,6 +4,9 @@ import com.intellij.psi.*;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class PsiHelper
 {
@@ -47,41 +50,53 @@ public class PsiHelper
 	
 	public static String getExpressionStringRepresentation(PsiAnnotationMemberValue value, String defaultValue)
 	{
-		if(value instanceof PsiLiteralExpression literalExpression)
-			return literalExpression.getValue() instanceof String s ? s : defaultValue;
-		if(value instanceof PsiBinaryExpression binaryExpression && binaryExpression.getOperationSign().toString().endsWith(":PLUS"))
+		StringBuilder sb = new StringBuilder();
+		AtomicBoolean valid = new AtomicBoolean(true);
+		visitExpressionStringRepresentation(value, (psi, str) -> sb.append(str), v -> valid.set(false));
+		return valid.get() ? sb.toString() : defaultValue;
+	}
+	
+	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled)
+	{
+		visitExpressionStringRepresentation(value, handled, psi ->
+		{});
+	}
+	
+	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled, Consumer<PsiAnnotationMemberValue> unhandled)
+	{
+		if(value instanceof PsiLiteralExpression literalExpression && literalExpression.getValue() instanceof String s)
 		{
-			var left = getExpressionStringRepresentation(binaryExpression.getLOperand(), null);
-			if(left == null) return defaultValue;
-			
-			var right = getExpressionStringRepresentation(binaryExpression.getROperand(), null);
-			if(right == null) return defaultValue;
-			
-			return left + right;
-		}
-		if(value instanceof PsiPolyadicExpression polyadicExpression)
+			handled.accept(value, s);
+			return;
+		} else if(value instanceof PsiBinaryExpression binaryExpression && binaryExpression.getOperationSign().toString().endsWith(":PLUS"))
 		{
-			StringBuilder sb = new StringBuilder();
+			visitExpressionStringRepresentation(binaryExpression.getLOperand(), handled, unhandled);
+			visitExpressionStringRepresentation(binaryExpression.getROperand(), handled, unhandled);
+			return;
+		} else if(value instanceof PsiPolyadicExpression polyadicExpression)
+		{
 			for(PsiExpression op : polyadicExpression.getOperands())
-			{
-				var str = getExpressionStringRepresentation(op, null);
-				if(str == null) return defaultValue;
-				sb.append(str);
-			}
-			return sb.toString();
-		}
-		if(value instanceof PsiReferenceExpression referenceExpression)
+				visitExpressionStringRepresentation(op, handled, unhandled);
+			return;
+		} else if(value instanceof PsiReferenceExpression referenceExpression)
 		{
 			var elem = referenceExpression.resolve();
 			if(elem instanceof PsiField psf)
 			{
 				var obj = psf.computeConstantValue();
-				if(obj instanceof String str) return str;
-				if(obj instanceof PsiAnnotationMemberValue amv) return getExpressionStringRepresentation(amv, defaultValue);
-			}
-			return defaultValue;
+				if(obj instanceof String str)
+				{
+					handled.accept(value, str);
+					return;
+				}
+				
+				if(obj instanceof PsiAnnotationMemberValue amv)
+				{
+					visitExpressionStringRepresentation(amv, handled, unhandled);
+				}
+			} else unhandled.accept(value);
 		}
-		return defaultValue;
+		unhandled.accept(value);
 	}
 	
 	public static boolean isOneOf(PsiAnnotation annotation, String... names)
