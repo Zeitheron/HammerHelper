@@ -3,9 +3,13 @@ package org.zeith.hammerhelper.inspections.annotations.registryname;
 import com.google.common.collect.ArrayListMultimap;
 import com.intellij.codeInspection.*;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTypesUtil;
 import org.jetbrains.annotations.NotNull;
+import org.zeith.hammerhelper.utils.PsiHelper;
 import org.zeith.hammerhelper.utils.SimplyRegisterMechanism;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class DuplicateRegistryNames
@@ -43,15 +47,20 @@ public class DuplicateRegistryNames
 				
 				if(allFields.size() > 1)
 				{
+					Set<String> typesB = new HashSet<>();
+					PsiHelper.visitPossibleTypes(PsiTypesUtil.getPsiClass(aClass.getType()), typesB);
+					
 					String allDupes = allFields.stream()
 							.filter(psf -> !psf.getName().equals(aClass.getName()))
+							.filter(psf -> !PsiHelper.sharingSameRegistryInheritance(PsiTypesUtil.getPsiClass(psf.getType()), typesB).isEmpty())
 							.map(PsiField::getName)
 							.collect(Collectors.joining(", "));
 					
-					holder.registerProblem(RegistryName.findAttributeValue("value"),
-							"This registry name is already in use in %s field%s.".formatted(allDupes, allDupes.contains(", ") ? "s" : ""),
-							ProblemHighlightType.ERROR
-					);
+					if(!allDupes.isBlank())
+						holder.registerProblem(RegistryName.findAttributeValue("value"),
+								"This registry name is already in use in %s field%s.".formatted(allDupes, allDupes.contains(", ") ? "s" : ""),
+								ProblemHighlightType.ERROR
+						);
 				}
 			}
 		};

@@ -10,12 +10,51 @@ import java.util.function.Consumer;
 
 public class PsiHelper
 {
+	public static Set<String> KNOWN_NON_REGISTRY_INTERFACES = Set.of(
+			"org.zeith.hammeranims.api.utils.IHammerReloadable",
+			"java.lang.Runnable",
+			"net.minecraft.world.level.ItemLike",
+			"net.minecraft.world.flag.FeatureElement"
+	);
+	
+	public static Set<String> sharingSameInheritance(PsiClass a, PsiClass b)
+	{
+		Set<String> typesB = new HashSet<>();
+		visitPossibleTypes(b, typesB);
+		return sharingSameInheritance(a, typesB);
+	}
+	
+	public static Set<String> sharingSameInheritance(PsiClass a, Set<String> typesB)
+	{
+		Set<String> typesA = new HashSet<>();
+		visitPossibleTypes(a, typesA);
+		typesA.retainAll(typesB);
+		typesA.remove("java.lang.Object");
+		return typesA;
+	}
+	
+	public static Set<String> sharingSameRegistryInheritance(PsiClass a, Set<String> typesB)
+	{
+		var typesA = sharingSameInheritance(a, typesB);
+		typesA.removeAll(KNOWN_NON_REGISTRY_INTERFACES);
+		return typesA;
+	}
+	
 	public static boolean instanceOf(PsiClass psiClass, Set<String> possibleTypes)
 	{
 		if(psiClass == null) return false;
 		if(possibleTypes.contains(psiClass.getQualifiedName())) return true;
 		return instanceOf(psiClass.getSuperClass(), possibleTypes)
 			   || Arrays.stream(psiClass.getInterfaces()).anyMatch(itf -> instanceOf(itf, possibleTypes));
+	}
+	
+	public static void visitPossibleTypes(PsiClass psiClass, Set<String> possibleTypes)
+	{
+		if(psiClass == null) return;
+		var qn = psiClass.getQualifiedName();
+		if(qn != null) possibleTypes.add(qn);
+		visitPossibleTypes(psiClass.getSuperClass(), possibleTypes);
+		Arrays.stream(psiClass.getInterfaces()).forEach(itf -> visitPossibleTypes(itf, possibleTypes));
 	}
 	
 	public static String findInstance(PsiClass psiClass, Set<String> possibleTypes)
@@ -59,7 +98,8 @@ public class PsiHelper
 	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled)
 	{
 		visitExpressionStringRepresentation(value, handled, psi ->
-		{});
+		{
+		});
 	}
 	
 	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled, Consumer<PsiAnnotationMemberValue> unhandled)

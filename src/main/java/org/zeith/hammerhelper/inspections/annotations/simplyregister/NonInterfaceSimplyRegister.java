@@ -4,7 +4,7 @@ import com.intellij.codeInspection.*;
 import com.intellij.psi.JavaElementVisitor;
 import com.intellij.psi.PsiClass;
 import org.jetbrains.annotations.NotNull;
-import org.zeith.hammerhelper.utils.QuickFixHelper;
+import org.zeith.hammerhelper.utils.ConvertClassToInterfaceFix;
 
 import static org.zeith.hammerhelper.utils.SimplyRegisterMechanism.findSimplyRegister;
 
@@ -24,7 +24,7 @@ public class NonInterfaceSimplyRegister
 				if(!aClass.isInterface())
 				{
 					holder.registerProblem(aClass.getNameIdentifier(), "@SimplyRegister-annotated classes should be interfaces.", ProblemHighlightType.WEAK_WARNING,
-							QuickFixHelper.convertClassToInterface()
+							ConvertClassToInterfaceFix.create()
 					);
 				}
 			}
