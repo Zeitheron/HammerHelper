@@ -98,12 +98,9 @@ public abstract class BaseHammerAnimsContrib
 	{
 		List<String> names = new ArrayList<>();
 		
-		VirtualFile file = getRecursive(project.getBaseDir(), "src", "main", "resources", "assets");
-		if(file == null) return names;
-		
-		for(var namespace : file.getChildren())
+		for(var namespace : FileHelper.getAllAssetNamespaces(project))
 		{
-			var sub = getRecursive(namespace, "bedrock", bedrockFolder);
+			var sub = getRecursive(namespace.file(), "bedrock", bedrockFolder);
 			names.addAll(FileHelper.getRecursiveFilesNamesWithFullPathFromDirectory(sub).stream().map(s -> s.substring(0, s.lastIndexOf("."))).toList());
 		}
 		
