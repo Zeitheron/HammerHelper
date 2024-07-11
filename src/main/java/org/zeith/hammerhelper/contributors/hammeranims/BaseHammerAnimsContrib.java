@@ -26,8 +26,7 @@ public abstract class BaseHammerAnimsContrib
 		this.optSuffix = optSuffix;
 		this.registrationType = registrationType;
 		
-		var simpleName = registrationType.substring(registrationType.lastIndexOf('.') + 1);
-		var createNoSuffixMN = simpleName + ".createNoSuffix";
+		var createNoSuffixMN = "createNoSuffix";
 		
 		extend(CompletionType.BASIC,
 				PlatformPatterns.psiElement().inside(PsiLiteralExpression.class),
@@ -57,7 +56,7 @@ public abstract class BaseHammerAnimsContrib
 						if(optSuffix != null && initializer instanceof PsiMethodCallExpression mce)
 						{
 							var expr = mce.getMethodExpression().getText();
-							createNoSuffix = expr.equals(createNoSuffixMN);
+							createNoSuffix = expr.contains(createNoSuffixMN);
 						}
 						
 						List<String> animationFiles = getAnimationFiles(project);
