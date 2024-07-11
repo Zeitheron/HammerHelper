@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "org.zeith"
-version = "1.0.7"
+version = file("VERSION.txt").text
 
 repositories {
     mavenCentral()
@@ -38,6 +38,7 @@ tasks {
     patchPluginXml {
         sinceBuild.set("232")
         untilBuild.set("242.*")
+        changeNotes.set(file("CHANGELOG.txt").text)
     }
 
     signPlugin {
@@ -49,4 +50,21 @@ tasks {
     publishPlugin {
         token.set(System.getenv("PUBLISH_TOKEN"))
     }
+}
+
+tasks.register('uploadPlugin') {
+    notCompatibleWithConfigurationCache("Yes.")
+    doLast {
+        def pluginDir = "R:\\zeith-jbr\\org.zeith.hammerhelper";
+
+        def fn = "hammerhelper-${version}.zip"
+        file("build/distributions/${fn}")
+                .renameTo(file("${pluginDir}\\${fn}"))
+
+        file("${pluginDir}\\__changelog.txt").setText(file("CHANGELOG.txt").text)
+    }
+}
+
+afterEvaluate {
+    tasks["build"].finalizedBy(uploadPlugin)
 }
