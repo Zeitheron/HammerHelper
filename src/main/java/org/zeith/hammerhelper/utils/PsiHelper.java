@@ -60,7 +60,8 @@ public class PsiHelper
 	public static String findInstance(PsiClass psiClass, Set<String> possibleTypes)
 	{
 		if(psiClass == null) return null;
-		if(possibleTypes.contains(psiClass.getQualifiedName())) return psiClass.getQualifiedName();
+		var qfn = psiClass.getQualifiedName();
+		if(qfn != null && possibleTypes.contains(qfn)) return psiClass.getQualifiedName();
 		var qn = findInstance(psiClass.getSuperClass(), possibleTypes);
 		if(qn != null) return qn;
 		return Arrays.stream(psiClass.getInterfaces())
