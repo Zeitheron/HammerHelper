@@ -15,6 +15,10 @@ public class SimplyRegisterMechanism
 			"com.zeitheron.hammercore.annotations.RegistryName"
 	};
 	
+	public static final String[] REF = {
+			"org.zeith.hammerlib.annotations.Ref"
+	};
+	
 	public static @Nullable PsiAnnotation findSimplyRegister(PsiModifierListOwner element)
 	{
 		return PsiHelper.findFirstAnnotation(element, SIMPLY_REGISTER);

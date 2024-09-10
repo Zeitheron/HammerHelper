@@ -60,14 +60,25 @@
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.DuplicateRegistryNames"
                          id="HLDuplicateRegistryName"
-                         displayName=""
+                         displayName="Duplicate registry name."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"/>
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.ref.InvalidRefTarget"
+                         id="HLInvalidRef"
+                         displayName="Invalid @Ref target."
                          enabledByDefault="true"
                          groupName="HammerLib"
                          language="JAVA"/>
 
         <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>
+
+        <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammerlib.RefCompletionContributor" language="JAVA"/>
+
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.ItemModelRefContrib" language="JAVA"/>
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.BlockStateRefContrib" language="JAVA"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.RefReferenceContrib" language="JAVA"/>
 
         <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammeranims.AnimationContrib" language="JAVA"/>
         <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammeranims.GeometryContrib" language="JAVA"/>

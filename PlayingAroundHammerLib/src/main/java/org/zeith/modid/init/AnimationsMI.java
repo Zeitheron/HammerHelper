@@ -4,7 +4,7 @@ import org.zeith.hammeranims.api.animation.IAnimationContainer;
 import org.zeith.hammerlib.annotations.RegistryName;
 import org.zeith.hammerlib.annotations.SimplyRegister;
 
-@SimplyRegister
+@SimplyRegister()
 public interface AnimationsMI {
     @RegistryName("test")
     IAnimationContainer TEST_1 = IAnimationContainer.create();

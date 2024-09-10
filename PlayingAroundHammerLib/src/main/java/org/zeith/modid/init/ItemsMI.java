@@ -6,12 +6,13 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import org.zeith.hammerlib.annotations.Ref;
 import org.zeith.hammerlib.annotations.RegistryName;
 import org.zeith.hammerlib.annotations.SimplyRegister;
 import org.zeith.hammerlib.util.mcf.Resources;
 import org.zeith.modid.ModId;
 
-@SimplyRegister
+@SimplyRegister(creativeTabs = @Ref(value = ModId.class, field = "MOD_TAB"))
 public interface ItemsMI
 {
 	@RegistryName("test")
