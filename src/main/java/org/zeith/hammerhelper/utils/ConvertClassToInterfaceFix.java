@@ -1,10 +1,8 @@
 package org.zeith.hammerhelper.utils;
 
-import com.intellij.codeInsight.FileModificationService;
-import com.intellij.codeInsight.daemon.impl.analysis.HighlightingFeature;
-import com.intellij.codeInsight.intention.preview.IntentionPreviewInfo;
 import com.intellij.codeInspection.ProblemDescriptor;
-import com.intellij.openapi.application.WriteAction;
+import com.intellij.modcommand.ModCommand;
+import com.intellij.modcommand.ModCommandQuickFix;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.*;
 import com.intellij.psi.search.SearchScope;
@@ -12,10 +10,7 @@ import com.intellij.psi.search.searches.ClassInheritorsSearch;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiUtil;
 import com.intellij.util.containers.ContainerUtil;
-import com.siyeh.ig.BaseInspectionVisitor;
-import com.siyeh.ig.InspectionGadgetsFix;
-import com.siyeh.ig.memory.InnerClassReferenceVisitor;
-import com.siyeh.ig.psiutils.ClassUtils;
+import com.siyeh.InspectionGadgetsBundle;
 import com.siyeh.ig.psiutils.MethodUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -30,26 +25,23 @@ public class ConvertClassToInterfaceFix
 		return new ClassMayBeInterfaceFix();
 	}
 	
-	public static class ClassMayBeInterfaceFix
-			extends InspectionGadgetsFix
+	static boolean isEmptyConstructor(@NotNull PsiMethod method)
 	{
-		public boolean reportClassesWithNonAbstractMethods = false;
-		
+		return method.isConstructor() && MethodUtils.isTrivial(method);
+	}
+	
+	public static class ClassMayBeInterfaceFix
+			extends ModCommandQuickFix
+	{
 		@Override
 		@NotNull
 		public String getFamilyName()
 		{
-			return "Convert class to interface";
+			return InspectionGadgetsBundle.message("class.may.be.interface.convert.quickfix");
 		}
 		
 		@Override
-		public boolean startInWriteAction()
-		{
-			return false;
-		}
-		
-		@Override
-		public void doFix(@NotNull Project project, @NotNull ProblemDescriptor descriptor)
+		public @NotNull ModCommand perform(@NotNull Project project, @NotNull ProblemDescriptor descriptor)
 		{
 			final PsiIdentifier classNameIdentifier = (PsiIdentifier) descriptor.getPsiElement();
 			final PsiClass interfaceClass = (PsiClass) classNameIdentifier.getParent();
@@ -60,31 +52,13 @@ public class ConvertClassToInterfaceFix
 			{
 				elements.add(inheritor);
 			}
-			if(!FileModificationService.getInstance().preparePsiElementsForWrite(elements))
-			{
-				return;
-			}
-			WriteAction.run(() ->
-			{
-				moveSubClassExtendsToImplements(elements);
-				changeClassToInterface(interfaceClass);
-				moveImplementsToExtends(interfaceClass);
-			});
-		}
-		
-		@Override
-		public @NotNull IntentionPreviewInfo generatePreview(@NotNull Project project, @NotNull ProblemDescriptor previewDescriptor)
-		{
-			final PsiIdentifier classNameIdentifier = (PsiIdentifier) previewDescriptor.getPsiElement();
-			final PsiClass interfaceClass = (PsiClass) classNameIdentifier.getParent();
-			// In preview, limit search to current file only
-			List<PsiClass> inheritorsInThisFile = SyntaxTraverser.psiTraverser(classNameIdentifier.getContainingFile()).filter(PsiClass.class)
-					.filter(cls -> cls.isInheritor(interfaceClass, false))
-					.toList();
-			moveSubClassExtendsToImplements(ContainerUtil.prepend(inheritorsInThisFile, interfaceClass));
-			changeClassToInterface(interfaceClass);
-			moveImplementsToExtends(interfaceClass);
-			return IntentionPreviewInfo.DIFF;
+			return ModCommand.psiUpdate(interfaceClass, (cls, updater) ->
+					{
+						moveSubClassExtendsToImplements(ContainerUtil.map(elements, updater::getWritable));
+						changeClassToInterface(cls);
+						moveImplementsToExtends(cls);
+					}
+			);
 		}
 		
 		private static void changeClassToInterface(PsiClass aClass)
@@ -184,127 +158,6 @@ public class ConvertClassToInterfaceFix
 					}
 					sourceReference.delete();
 				}
-			}
-		}
-		
-		static boolean isEmptyConstructor(@NotNull PsiMethod method)
-		{
-			return method.isConstructor() && MethodUtils.isTrivial(method);
-		}
-		
-		private class ClassMayBeInterfaceVisitor
-				extends BaseInspectionVisitor
-		{
-			@Override
-			public void visitClass(@NotNull PsiClass aClass)
-			{
-				// no call to super, so that it doesn't drill down to inner classes
-				if(aClass.isInterface() || aClass.isAnnotationType() || aClass.isEnum())
-				{
-					return;
-				}
-				if(aClass instanceof PsiTypeParameter || aClass instanceof PsiAnonymousClass)
-				{
-					return;
-				}
-				if(!aClass.hasModifierProperty(PsiModifier.ABSTRACT))
-				{
-					return;
-				}
-				if(PsiUtil.isLocalClass(aClass) && !HighlightingFeature.LOCAL_INTERFACES.isAvailable(aClass))
-				{
-					return;
-				}
-				if(!mayBeInterface(aClass))
-				{
-					return;
-				}
-				if(ClassUtils.isInnerClass(aClass))
-				{
-					final InnerClassReferenceVisitor visitor = new InnerClassReferenceVisitor(aClass);
-					aClass.accept(visitor);
-					if(!visitor.canInnerClassBeStatic())
-					{
-						return;
-					}
-				}
-				registerClassError(aClass);
-			}
-			
-			public boolean mayBeInterface(PsiClass aClass)
-			{
-				final PsiReferenceList extendsList = aClass.getExtendsList();
-				if(extendsList != null)
-				{
-					final PsiJavaCodeReferenceElement[] extendsElements = extendsList.getReferenceElements();
-					if(extendsElements.length > 0)
-					{
-						return false;
-					}
-				}
-				final PsiClassInitializer[] initializers = aClass.getInitializers();
-				if(initializers.length > 0)
-				{
-					return false;
-				}
-				return allMethodsPublicAbstract(aClass) && allFieldsPublicStaticFinal(aClass) && allInnerClassesPublic(aClass);
-			}
-			
-			private boolean allFieldsPublicStaticFinal(PsiClass aClass)
-			{
-				boolean allFieldsStaticFinal = true;
-				final PsiField[] fields = aClass.getFields();
-				for(final PsiField field : fields)
-				{
-					if(!(field.hasModifierProperty(PsiModifier.STATIC) && field.hasModifierProperty(PsiModifier.FINAL)
-						 && field.hasModifierProperty(PsiModifier.PUBLIC)))
-					{
-						allFieldsStaticFinal = false;
-					}
-				}
-				return allFieldsStaticFinal;
-			}
-			
-			private boolean allMethodsPublicAbstract(PsiClass aClass)
-			{
-				final PsiMethod[] methods = aClass.getMethods();
-				for(final PsiMethod method : methods)
-				{
-					if(isEmptyConstructor(method))
-					{
-						continue;
-					}
-					if(!method.hasModifierProperty(PsiModifier.ABSTRACT))
-					{
-						if(MethodUtils.isToString(method) || MethodUtils.isHashCode(method) || MethodUtils.isEquals(method))
-						{
-							// can't have default methods overriding Object methods.
-							return false;
-						}
-						if(!reportClassesWithNonAbstractMethods || !PsiUtil.isLanguageLevel8OrHigher(aClass))
-						{
-							return false;
-						}
-					}
-					if(!method.hasModifierProperty(PsiModifier.PUBLIC) || method.hasModifierProperty(PsiModifier.FINAL))
-					{
-						return false;
-					}
-				}
-				return true;
-			}
-			
-			private boolean allInnerClassesPublic(PsiClass aClass)
-			{
-				final PsiClass[] innerClasses = aClass.getInnerClasses();
-				for(PsiClass innerClass : innerClasses)
-				{
-					if(!innerClass.hasModifierProperty(PsiModifier.PUBLIC))
-					{
-						return false;
-					}
-				}
-				return true;
 			}
 		}
 	}
