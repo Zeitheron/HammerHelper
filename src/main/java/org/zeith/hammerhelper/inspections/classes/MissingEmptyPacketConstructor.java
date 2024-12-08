@@ -24,13 +24,15 @@ public class MissingEmptyPacketConstructor
 			public void visitClass(@NotNull PsiClass aClass)
 			{
 				super.visitClass(aClass);
+				
+				var name = aClass.getNameIdentifier();
+				if(name == null) return;
+				
 				if(!PsiHelper.inHierarchy(aClass, PACKET_TYPE)) return;
 				
 				var ctrs = aClass.getConstructors();
-				if(ctrs.length > 0 && Arrays.stream(ctrs).noneMatch(PsiMethod::hasParameters))
-				{
-					holder.registerProblem(aClass, "Missing empty (no-data) packet constructor.", ProblemHighlightType.ERROR);
-				}
+				if(Arrays.stream(ctrs).allMatch(PsiMethod::hasParameters))
+					holder.registerProblem(name, "Missing empty (no-data) packet constructor.", ProblemHighlightType.ERROR);
 			}
 		};
 	}
