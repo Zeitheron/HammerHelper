@@ -190,4 +190,23 @@ public class PsiHelper
 			return pc != null && (qn = pc.getQualifiedName()) != null && typeSet.contains(qn);
 		};
 	}
+	
+	public static Predicate<PsiClass> oneOfImplementedMethods(String baseClass, String... names)
+	{
+		return oneOf(baseClass).negate().and(pc ->
+		{
+			for(String name : names)
+			{
+				for(var method : pc.findMethodsByName(name, false))
+				{
+					if(method.hasAnnotation("java.lang.Override"))
+					{
+						return true;
+					}
+				}
+			}
+			
+			return false;
+		});
+	}
 }

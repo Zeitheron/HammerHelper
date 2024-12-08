@@ -1,11 +1,11 @@
-package org.zeith.hammerhelper.inspections.classes;
+package org.zeith.hammerhelper.inspections.classes.packets;
 
 import com.intellij.codeInspection.*;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.PsiHelper;
 
-import static org.zeith.hammerhelper.inspections.classes.MissingEmptyPacketConstructor.PACKET_TYPE;
+import static org.zeith.hammerhelper.inspections.classes.packets.MissingEmptyPacketConstructor.PACKET_TYPE;
 
 public class AnonymousPacketClass
 		extends LocalInspectionTool

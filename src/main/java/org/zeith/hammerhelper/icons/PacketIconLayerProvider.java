@@ -9,7 +9,7 @@ import org.zeith.hammerhelper.utils.PsiHelper;
 
 import javax.swing.*;
 
-import static org.zeith.hammerhelper.inspections.classes.MissingEmptyPacketConstructor.PACKET_TYPE;
+import static org.zeith.hammerhelper.inspections.classes.packets.MissingEmptyPacketConstructor.PACKET_TYPE;
 
 public class PacketIconLayerProvider
 		implements IconLayerProvider

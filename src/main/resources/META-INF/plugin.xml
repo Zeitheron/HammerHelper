@@ -80,7 +80,7 @@
                          language="JAVA"
         />
 
-        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.MissingEmptyPacketConstructor"
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.packets.MissingEmptyPacketConstructor"
                          id="HLMissingEmptyPacketConstructor"
                          displayName="Missing empty (no-data) packet constructor."
                          enabledByDefault="true"
@@ -88,9 +88,17 @@
                          language="JAVA"
         />
 
-        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.AnonymousPacketClass"
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.packets.AnonymousPacketClass"
                          id="HLAnonymousPacketClass"
                          displayName="Anonymous packet class is not allowed."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.packets.MissingPacketExecutes"
+                         id="HLMissingPacketExecutes"
+                         displayName="Packet class does nothing."
                          enabledByDefault="true"
                          groupName="HammerLib"
                          language="JAVA"

@@ -1,4 +1,4 @@
-package org.zeith.hammerhelper.inspections.classes;
+package org.zeith.hammerhelper.inspections.classes.packets;
 
 import com.intellij.codeInspection.*;
 import com.intellij.psi.*;
@@ -24,10 +24,8 @@ public class MissingEmptyPacketConstructor
 			public void visitClass(@NotNull PsiClass aClass)
 			{
 				super.visitClass(aClass);
-				
 				var name = aClass.getNameIdentifier();
 				if(name == null) return;
-				
 				if(!PsiHelper.inHierarchy(aClass, PACKET_TYPE)) return;
 				
 				var ctrs = aClass.getConstructors();
