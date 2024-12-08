@@ -17,7 +17,7 @@ public interface ItemsMI
 {
 	@RegistryName("test")
 	Item TEST_ITEM = ModId.MOD_TAB.add(new Item(new Item.Properties())
-	{
+	{ 
 		@Override
 		public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand)
 		{

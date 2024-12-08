@@ -40,6 +40,14 @@
                          language="JAVA"
         />
 
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.simplyregister.AnonymousClassesInsideSimplyRegisters"
+                         id="AnonymousClassesInsideSimplyRegisters"
+                         displayName="@SimplyRegister-annotated classes should not contain anonymous classes."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.methods.ResourcesInspector"
                          id="HLResourcesInspector"
                          displayName="HammerLib's Resources sanity checks."

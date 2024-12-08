@@ -209,4 +209,15 @@ public class PsiHelper
 			return false;
 		});
 	}
+	
+	public static PsiClass findClassParent(PsiElement parent)
+	{
+		while(parent != null)
+		{
+			parent = parent.getParent();
+			if(parent instanceof PsiClass pc)
+				return pc;
+		}
+		return null;
+	}
 }
