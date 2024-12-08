@@ -104,6 +104,14 @@
                          language="JAVA"
         />
 
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.packets.UnserializedPacketData"
+                         id="HLUnserializedPacketData"
+                         displayName="Some of the packet's fields are not serialized"
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
         <lang.inspectionSuppressor
                 language="JAVA"
                 implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"
