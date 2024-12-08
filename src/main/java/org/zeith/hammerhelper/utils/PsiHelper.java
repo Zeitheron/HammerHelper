@@ -5,8 +5,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
-import java.util.function.Consumer;
+import java.util.function.*;
 
 public class PsiHelper
 {
@@ -99,8 +98,9 @@ public class PsiHelper
 	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled)
 	{
 		visitExpressionStringRepresentation(value, handled, psi ->
-		{
-		});
+				{
+				}
+		);
 	}
 	
 	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled, Consumer<PsiAnnotationMemberValue> unhandled)
@@ -148,5 +148,46 @@ public class PsiHelper
 			if(qn.equals(name))
 				return true;
 		return false;
+	}
+	
+	public static Set<PsiClass> getClassHierarchy(PsiClass type)
+	{
+		Set<PsiClass> hierarchy = new HashSet<>();
+		
+		Stack<PsiClass> stack = new Stack<>();
+		stack.push(type);
+		while(!stack.isEmpty())
+		{
+			PsiClass psi = stack.pop();
+			hierarchy.add(psi);
+			for(PsiClass itf : psi.getInterfaces()) stack.push(itf);
+			for(PsiClassType itf : psi.getExtendsListTypes()) Optional.ofNullable(itf.resolve()).ifPresent(stack::push);
+		}
+		
+		return hierarchy;
+	}
+	
+	public static boolean inHierarchy(PsiClass type, Predicate<PsiClass> filter)
+	{
+		Stack<PsiClass> stack = new Stack<>();
+		stack.push(type);
+		while(!stack.isEmpty())
+		{
+			PsiClass psi = stack.pop();
+			if(filter.test(psi)) return true;
+			for(PsiClass itf : psi.getInterfaces()) stack.push(itf);
+			for(PsiClassType itf : psi.getExtendsListTypes()) Optional.ofNullable(itf.resolve()).ifPresent(stack::push);
+		}
+		return false;
+	}
+	
+	public static Predicate<PsiClass> oneOf(String... types)
+	{
+		Set<String> typeSet = Set.of(types);
+		return pc ->
+		{
+			String qn;
+			return pc != null && (qn = pc.getQualifiedName()) != null && typeSet.contains(qn);
+		};
 	}
 }

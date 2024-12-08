@@ -21,58 +21,93 @@
                          displayName="Non [a-z0-9/._-] character in prefix."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.InvalidValueRegistryName"
                          id="RegistryNameInvalid"
                          displayName="Non [a-z0-9/._-] character in registry name."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.simplyregister.NonInterfaceSimplyRegister"
                          id="SimplyRegisterNonInterfaceClass"
                          displayName="@SimplyRegister-annotated classes should be interfaces."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.methods.ResourcesInspector"
                          id="HLResourcesInspector"
                          displayName="HammerLib's Resources sanity checks."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.MissingItemModel"
                          id="HLMissingItemModel"
                          displayName="Item model json is missing."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.MissingBlockstateModel"
                          id="HLMissingBlockModel"
                          displayName="Block state map json is missing."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.DuplicateRegistryNames"
                          id="HLDuplicateRegistryName"
                          displayName="Duplicate registry name."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.ref.InvalidRefTarget"
                          id="HLInvalidRef"
                          displayName="Invalid @Ref target."
                          enabledByDefault="true"
                          groupName="HammerLib"
-                         language="JAVA"/>
+                         language="JAVA"
+        />
 
-        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.MissingEmptyPacketConstructor"
+                         id="HLMissingEmptyPacketConstructor"
+                         displayName="Missing empty (no-data) packet constructor."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.AnonymousPacketClass"
+                         id="HLAnonymousPacketClass"
+                         displayName="Anonymous packet class is not allowed."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
+        <lang.inspectionSuppressor
+                language="JAVA"
+                implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"
+        />
+
+        <iconLayerProvider implementation="org.zeith.hammerhelper.icons.SimplyRegisterIconLayerProvider"
+                           id="HLSimplyRegisterIcon"
+        />
+
+        <iconLayerProvider implementation="org.zeith.hammerhelper.icons.PacketIconLayerProvider"
+                           id="HLPacketIcon"
+        />
 
         <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammerlib.RefCompletionContributor" language="JAVA"/>
 
