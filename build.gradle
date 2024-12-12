@@ -51,13 +51,13 @@ tasks {
     }
 
     signPlugin {
-        certificateChain.set(System.getenv("CERTIFICATE_CHAIN"))
-        privateKey.set(System.getenv("PRIVATE_KEY"))
-        password.set(System.getenv("PRIVATE_KEY_PASSWORD"))
+        certificateChain = file(System.getenv("JBR_SIGN_CHAIN")).text
+        privateKey = file(System.getenv("JBR_SIGN_PK")).text
+        password = System.getenv("JBR_CH_PASS")
     }
 
     publishPlugin {
-        token.set(System.getenv("JETBRAINS_MARKETPLACE_TOKEN"))
+        token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN")
     }
 }
 
