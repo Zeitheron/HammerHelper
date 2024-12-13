@@ -75,7 +75,6 @@ public abstract class CreatingRegistrar
 					{
 						String directoryPath = namespaceVF.toNioPath().toAbsolutePath().toString().replace(File.separatorChar, '/') + "/" + ap + "/" + registryPath + ".json";
 						int lastIdx = directoryPath.lastIndexOf('/');
-						FileHelper.getResourcesDirectory(project);
 						VirtualFile directory = VfsUtil.createDirectories(directoryPath.substring(0, lastIdx));
 						return directory.createChildData(requestor, directoryPath.substring(lastIdx + 1));
 					});
@@ -88,7 +87,7 @@ public abstract class CreatingRegistrar
 	
 	protected List<Namespace> getAssetNamespaces(PsiElement element)
 	{
-		return FileHelper.getAllAssetNamespaces(element.getProject());
+		return FileHelper.getAllAssetNamespaces(element.getContainingFile());
 	}
 	
 	public interface TemplateGenerator

@@ -41,7 +41,6 @@ public abstract class BaseHammerAnimsContrib
 						PsiElement position = parameters.getPosition();
 						var field = getAnnotationContext(position);
 						if(field == null) return;
-						Project project = position.getProject();
 						
 						var prefix = "";
 						if(field.getParent() instanceof PsiClass psiClass)
@@ -59,7 +58,7 @@ public abstract class BaseHammerAnimsContrib
 							createNoSuffix = expr.contains(createNoSuffixMN);
 						}
 						
-						List<String> animationFiles = getAnimationFiles(project);
+						List<String> animationFiles = getAnimationFiles(position.getContainingFile());
 						if(optSuffix == null || createNoSuffix)
 						{
 							for(String file : animationFiles)
@@ -93,11 +92,11 @@ public abstract class BaseHammerAnimsContrib
 		return null;
 	}
 	
-	private List<String> getAnimationFiles(Project project)
+	private List<String> getAnimationFiles(PsiFile file)
 	{
 		List<String> names = new ArrayList<>();
 		
-		for(var namespace : FileHelper.getAllAssetNamespaces(project))
+		for(var namespace : FileHelper.getAllAssetNamespaces(file))
 		{
 			var sub = getRecursive(namespace.file(), "bedrock", bedrockFolder);
 			names.addAll(FileHelper.getRecursiveFilesNamesWithFullPathFromDirectory(sub).stream().map(s -> s.substring(0, s.lastIndexOf("."))).toList());

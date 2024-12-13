@@ -1,6 +1,5 @@
 package org.zeith.hammerhelper.contributors.refs;
 
-import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTypesUtil;
@@ -53,7 +52,7 @@ public abstract class BaseRegisteredObjectRefContributor
 	
 	protected void forEachAssetsNamespace(PsiElement element, Consumer<VirtualFile> namespaceHandler)
 	{
-		for(var namespace : FileHelper.getAllAssetNamespaces(element.getProject()))
+		for(var namespace : FileHelper.getAllAssetNamespaces(element.getContainingFile()))
 			namespaceHandler.accept(namespace.file());
 	}
 }

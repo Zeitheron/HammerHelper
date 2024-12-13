@@ -1,8 +1,10 @@
 package org.zeith.hammerhelper.utils;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.psi.PsiFile;
 import org.zeith.hammerhelper.HammerHelper;
 
 import java.nio.file.Path;
@@ -10,22 +12,17 @@ import java.util.*;
 
 public class FileHelper
 {
-	public static String getSrcMainResourcesChild(Project project)
+	public static VirtualFile getResourcesDirectory(PsiFile from)
 	{
-		return "src/main/resources";
+		Project project = from.getProject();
+		ProjectFileIndex indices = ProjectFileIndex.getInstance(project);
+		VirtualFile baseDir = indices.getContentRootForFile(from.getVirtualFile());
+		return baseDir != null ? baseDir.findChild("resources") : null;
 	}
 	
-	public static VirtualFile getResourcesDirectory(Project project)
+	public static List<Namespace> getAllAssetNamespaces(PsiFile file)
 	{
-		VirtualFile baseDir = project.getBaseDir();
-		VirtualFile resourcesDir = baseDir.findFileByRelativePath(getSrcMainResourcesChild(project));
-		if(resourcesDir == null) resourcesDir = baseDir.findChild("resources");
-		return resourcesDir;
-	}
-	
-	public static List<Namespace> getAllAssetNamespaces(Project project)
-	{
-		var cfg = HammerHelper.cfg(project);
+		var cfg = HammerHelper.cfg(file.getProject());
 		
 		List<Namespace> namespaces = new ArrayList<>();
 		
@@ -37,7 +34,7 @@ public class FileHelper
 				namespaces.add(new Namespace(namespace.getValue(), vf));
 			}
 		
-		var assets = getRecursive(getResourcesDirectory(project), "assets");
+		var assets = getRecursive(getResourcesDirectory(file), "assets");
 		if(assets != null) for(VirtualFile child : assets.getChildren()) namespaces.add(new Namespace(child.getName(), child));
 		
 		return namespaces;
