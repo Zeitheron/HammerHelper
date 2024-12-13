@@ -16,7 +16,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .intellijPlatform
-CHANGELOG.txt
+CHANGELOG.html
 VERSION.txt
 
 ### Eclipse ###

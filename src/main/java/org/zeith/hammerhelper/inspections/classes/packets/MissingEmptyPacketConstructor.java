@@ -29,7 +29,7 @@ public class MissingEmptyPacketConstructor
 				if(!PsiHelper.inHierarchy(aClass, PACKET_TYPE)) return;
 				
 				var ctrs = aClass.getConstructors();
-				if(Arrays.stream(ctrs).allMatch(PsiMethod::hasParameters))
+				if(ctrs.length > 0 && Arrays.stream(ctrs).allMatch(PsiMethod::hasParameters))
 					holder.registerProblem(name, "Missing empty (no-data) packet constructor.", ProblemHighlightType.ERROR);
 			}
 		};

@@ -29,45 +29,43 @@ public class ResourcesInspector
 				
 				if(pars.length == 1)
 				{
-					AtomicBoolean reachedSemicolon = new AtomicBoolean();
-					PsiHelper.visitExpressionStringRepresentation(pars[0], (psi, str) ->
+					String str = PsiHelper.getExpressionStringRepresentation(pars[0], "");
+					
+					String path;
+					String namespace;
+					if(str.contains(":"))
 					{
-						String path = "";
-						String namespace = "";
-						
-						if(!reachedSemicolon.get())
-						{
-							namespace = str;
-							if(str.contains(":"))
-							{
-								var split = str.split(":", 2);
-								namespace = split[0];
-								path = split[1];
-								reachedSemicolon.set(true);
-							}
-						} else path = str;
-						
-						if(!namespace.isEmpty() && !ResourceLocationChecks.isValidNamespace(namespace))
-							holder.registerProblem(psi, "Non [a-z0-9._-] character in namespace.", ProblemHighlightType.ERROR);
-						
-						if(!path.isEmpty() && !ResourceLocationChecks.isValidPath(path))
-							holder.registerProblem(psi, "Non [a-z0-9/._-] character in path.", ProblemHighlightType.ERROR);
-					});
+						var split = str.split(":", 2);
+						namespace = split[0];
+						path = split[1];
+					} else
+					{
+						namespace = "minecraft";
+						path = str;
+					}
+					
+					if(!namespace.isEmpty() && !ResourceLocationChecks.isValidNamespace(namespace))
+						holder.registerProblem(pars[0], "Non [a-z0-9._-] character in namespace.", ProblemHighlightType.ERROR);
+					
+					if(!path.isEmpty() && !ResourceLocationChecks.isValidPath(path))
+						holder.registerProblem(pars[0], "Non [a-z0-9/._-] character in path.", ProblemHighlightType.ERROR);
 				}
 				
 				if(pars.length == 2)
 				{
 					PsiHelper.visitExpressionStringRepresentation(pars[0], (psi, str) ->
-					{
-						if(str != null && !ResourceLocationChecks.isValidNamespace(str))
-							holder.registerProblem(psi, "Non [a-z0-9._-] character in namespace.", ProblemHighlightType.ERROR);
-					});
+							{
+								if(str != null && !ResourceLocationChecks.isValidNamespace(str))
+									holder.registerProblem(psi, "Non [a-z0-9._-] character in namespace.", ProblemHighlightType.ERROR);
+							}
+					);
 					
 					PsiHelper.visitExpressionStringRepresentation(pars[1], (psi, str) ->
-					{
-						if(str != null && !ResourceLocationChecks.isValidPath(str))
-							holder.registerProblem(psi, "Non [a-z0-9/._-] character in path.", ProblemHighlightType.ERROR);
-					});
+							{
+								if(str != null && !ResourceLocationChecks.isValidPath(str))
+									holder.registerProblem(psi, "Non [a-z0-9/._-] character in path.", ProblemHighlightType.ERROR);
+							}
+					);
 				}
 			}
 		};

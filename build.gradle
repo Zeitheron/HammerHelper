@@ -36,18 +36,18 @@ tasks.withType(JavaCompile) {
 tasks {
     // Set the JVM compatibility versions
     tasks.withType(JavaCompile) {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = jvmVersion
+        targetCompatibility = jvmVersion
     }
 
     tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile) {
-        kotlinOptions.jvmTarget = "21"
+        kotlinOptions.jvmTarget = jvmVersion
     }
 
     patchPluginXml {
-        sinceBuild.set("242")
-        untilBuild.set("244.*")
-        changeNotes.set(file("CHANGELOG.txt").text)
+        sinceBuild.set("243")
+        //untilBuild.set("244.*")
+        changeNotes.set(file("CHANGELOG.html").text)
     }
 
     signPlugin {
@@ -59,21 +59,4 @@ tasks {
     publishPlugin {
         token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN")
     }
-}
-
-tasks.register('uploadPlugin') {
-    notCompatibleWithConfigurationCache("Yes.")
-    doLast {
-        def pluginDir = "R:\\zeith-jbr\\org.zeith.hammerhelper";
-
-        def fn = "hammerhelper-${version}.zip"
-        file("build/distributions/${fn}")
-                .renameTo(file("${pluginDir}\\${fn}"))
-
-        file("${pluginDir}\\__changelog.txt").setText(file("CHANGELOG.txt").text)
-    }
-}
-
-afterEvaluate {
-    uploadPlugin.dependsOn("buildPlugin")
 }

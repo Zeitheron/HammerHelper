@@ -114,7 +114,7 @@
 
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.packets.UnserializedPacketData"
                          id="HLUnserializedPacketData"
-                         displayName="Some of the packet's fields are not serialized"
+                         displayName="Some of the packet's fields are not serialized."
                          enabledByDefault="true"
                          groupName="HammerLib"
                          language="JAVA"
