@@ -6,8 +6,6 @@ import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.ModCompatMechanism;
 import org.zeith.hammerhelper.utils.PsiHelper;
 
-import java.util.Objects;
-
 public class NonMatchingCompatTypes
 		extends LocalInspectionTool
 {
@@ -23,6 +21,7 @@ public class NonMatchingCompatTypes
 				if(loadCompat == null) return;
 				
 				PsiClass compatType = ModCompatMechanism.getCompatType(loadCompat);
+				if(compatType == null) return;
 				
 				if(!PsiHelper.inHierarchy(aClass, compatType::equals))
 				{
