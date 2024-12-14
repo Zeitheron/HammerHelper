@@ -1,5 +1,5 @@
 {
-	"parent": "modid:item/base",
+	"parent": "modid:block/base",
 	"textures": {
 		"layer0": "modid:item/test"
 	}

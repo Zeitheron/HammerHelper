@@ -5,24 +5,85 @@ import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
-import org.zeith.hammerhelper.HammerHelper;
+import com.intellij.util.ProcessingContext;
+import org.jetbrains.annotations.Nullable;
+import org.zeith.hammerhelper.configs.namespaces.NamespaceConfigsHH;
 
 import java.nio.file.Path;
 import java.util.*;
 
 public class FileHelper
 {
+	@Nullable
+	public static VirtualFile findAssetRoot(PsiFile file, ProcessingContext context, KeyedPrefixPath prefixPath)
+	{
+		var ASSET_ROOT = prefixPath.key();
+		var prefix = prefixPath.prefix();
+		
+		var vfOpt = context.get(ASSET_ROOT);
+		if(vfOpt != null)
+			return vfOpt.orElse(null);
+		
+		Stack<String> prefixes = new Stack<>();
+		prefixes.addAll(List.of(prefix.split("/")));
+		
+		VirtualFile res = getRecursive(getResourcesDirectory(file), "assets");
+		if(res == null)
+		{
+			context.put(ASSET_ROOT, Optional.empty());
+			return null;
+		}
+		
+		boolean stacking = false;
+		boolean stackingComplete = false;
+		
+		VirtualFile vf = file.getVirtualFile();
+		while(vf != null)
+		{
+			vf = vf.getParent();
+			
+			if(vf != null && !prefixes.isEmpty() && prefixes.peek().equalsIgnoreCase(vf.getName()))
+			{
+				stacking = true;
+				prefixes.pop();
+				if(prefixes.isEmpty())
+				{
+					stacking = false;
+					stackingComplete = true;
+				}
+				continue;
+			}
+			
+			// Stacking, but the prefix does not match...
+			if(stacking && !prefixes.isEmpty() && !prefixes.peek().equalsIgnoreCase(vf.getName()))
+				break;
+			
+			if(vf != null && Objects.equals(res, vf))
+			{
+				if(!stackingComplete)
+					break;
+				context.put(ASSET_ROOT, Optional.of(res));
+				return res;
+			}
+		}
+		
+		context.put(ASSET_ROOT, Optional.empty());
+		return null;
+	}
+	
 	public static VirtualFile getResourcesDirectory(PsiFile from)
 	{
 		Project project = from.getProject();
+		var vf = from.getVirtualFile();
+		if(vf == null) return null;
 		ProjectFileIndex indices = ProjectFileIndex.getInstance(project);
-		VirtualFile baseDir = indices.getContentRootForFile(from.getVirtualFile());
+		VirtualFile baseDir = indices.getContentRootForFile(vf);
 		return baseDir != null ? baseDir.findChild("resources") : null;
 	}
 	
 	public static List<Namespace> getAllAssetNamespaces(PsiFile file)
 	{
-		var cfg = HammerHelper.cfg(file.getProject());
+		var cfg = new NamespaceConfigsHH(file.getProject());
 		
 		List<Namespace> namespaces = new ArrayList<>();
 		
@@ -42,6 +103,7 @@ public class FileHelper
 	
 	public static VirtualFile getRecursive(VirtualFile directory, String... path)
 	{
+		if(directory == null) return null;
 		for(var p : path)
 		{
 			directory = directory.findFileByRelativePath(p);

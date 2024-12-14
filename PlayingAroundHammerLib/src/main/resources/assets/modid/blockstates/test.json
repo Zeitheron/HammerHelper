@@ -1,0 +1,10 @@
+{
+	"variants": {
+		"": {
+			"model": "modid:block/test",
+			"textures": {
+				"base": "modid:item/test"
+			}
+		}
+	}
+}

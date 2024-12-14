@@ -2,6 +2,13 @@ package org.zeith.hammerhelper.utils;
 
 public class ResourceLocationChecks
 {
+	public static String[] split(String path)
+	{
+		String[] split = path.split(":", 2);
+		if(split.length == 1) return new String[] { "minecraft", split[0] };
+		return split;
+	}
+	
 	public static boolean isValidPath(String pPath)
 	{
 		for(int i = 0; i < pPath.length(); ++i)

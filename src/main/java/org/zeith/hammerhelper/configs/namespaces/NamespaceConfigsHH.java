@@ -1,16 +1,17 @@
-package org.zeith.hammerhelper;
+package org.zeith.hammerhelper.configs.namespaces;
 
 import com.intellij.ide.util.PropertiesComponent;
 import com.intellij.openapi.project.Project;
+import org.zeith.hammerhelper.configs.HHConfigHelper;
 
 import java.util.*;
 
-public class ConfigsHH
+public class NamespaceConfigsHH
 {
-	private static final String EXTRA_NAMESPACES = "extraNamespaces";
+	private static final String EXTRA_NAMESPACES = HHConfigHelper.getConfigGlobalName("extraNamespaces");
 	private final PropertiesComponent properties;
 	
-	public ConfigsHH(Project project)
+	public NamespaceConfigsHH(Project project)
 	{
 		properties = PropertiesComponent.getInstance(project);
 	}
