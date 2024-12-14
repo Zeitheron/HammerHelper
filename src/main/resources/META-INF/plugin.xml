@@ -121,24 +121,28 @@
                          language="JAVA"
         />
 
-        <lang.inspectionSuppressor
-                language="JAVA"
-                implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.classes.compat.NonMatchingCompatTypes"
+                         id="HLNonMatchingCompatTypes"
+                         displayName="Non-matching compatibility types between @LoadCompat and extends."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
         />
 
-        <iconLayerProvider implementation="org.zeith.hammerhelper.icons.SimplyRegisterIconLayerProvider"
-                           id="HLSimplyRegisterIcon"
-        />
+        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.SimplyRegisterUnusedSuppressor"/>
+        <lang.inspectionSuppressor language="JAVA" implementationClass="org.zeith.hammerhelper.suppressors.ModCompatSuppressor"/>
 
-        <iconLayerProvider implementation="org.zeith.hammerhelper.icons.PacketIconLayerProvider"
-                           id="HLPacketIcon"
-        />
+        <iconLayerProvider id="HLSimplyRegisterIcon" implementation="org.zeith.hammerhelper.icons.SimplyRegisterIconLayerProvider"/>
+        <iconLayerProvider id="HLPacketIcon" implementation="org.zeith.hammerhelper.icons.PacketIconLayerProvider"/>
+        <iconLayerProvider id="HLCompatIcon" implementation="org.zeith.hammerhelper.icons.ModCompatIconLayerProvider"/>
 
         <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammerlib.RefCompletionContributor" language="JAVA"/>
+        <completion.contributor implementationClass="org.zeith.hammerhelper.contributors.hammerlib.ModCompatContributor" language="JAVA"/>
 
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.ItemModelRefContrib" language="JAVA"/>
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.BlockStateRefContrib" language="JAVA"/>
         <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.RefReferenceContrib" language="JAVA"/>
+        <psi.referenceContributor implementation="org.zeith.hammerhelper.contributors.hammerlib.ref.ModCompatRefContrib" language="JAVA"/>
 
         <!-- HAMMER ANIMATIONS  CONTRIBUTION -->
 

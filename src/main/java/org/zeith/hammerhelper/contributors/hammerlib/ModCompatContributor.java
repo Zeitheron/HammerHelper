@@ -4,15 +4,18 @@ import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTypesUtil;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
+import org.zeith.hammerhelper.utils.ModCompatMechanism;
 import org.zeith.hammerhelper.utils.PsiHelper;
-import org.zeith.hammerhelper.utils.SimplyRegisterMechanism;
 
-public class RefCompletionContributor
+import java.util.Map;
+
+public class ModCompatContributor
 		extends CompletionContributor
 {
-	public RefCompletionContributor()
+	public ModCompatContributor()
 	{
 		extend(CompletionType.BASIC,
 				PlatformPatterns.psiElement().inside(PsiLiteralExpression.class),
@@ -28,10 +31,9 @@ public class RefCompletionContributor
 						var an = getAnnotationContext(element);
 						if(an == null) return;
 						
-						PsiClass pc = PsiHelper.getClassFromPsiAnnotation(an, "value");
-						if(pc != null)
-							for(PsiField f : pc.getFields())
-								result.addElement(LookupElementBuilder.create(f));
+						Map<String, PsiClass> mods = ModCompatMechanism.gatherModClasses(element);
+						for(String modid : mods.keySet())
+							result.addElement(LookupElementBuilder.create(modid));
 						
 						result.stopHere();
 					}
@@ -42,12 +44,12 @@ public class RefCompletionContributor
 	protected PsiAnnotation getAnnotationContext(PsiElement position)
 	{
 		if(!(position.getParent().getParent() instanceof PsiNameValuePair pair)
-		   || !"field".equals(pair.getAttributeName())
+		   || !"modid".equals(pair.getAttributeName())
 		) return null;
 		
 		if(position.getParent().getParent().getParent() instanceof PsiAnnotationParameterList apr
 		   && apr.getParent() instanceof PsiAnnotation annotation
-		   && PsiHelper.isOneOf(annotation, SimplyRegisterMechanism.REF))
+		   && PsiHelper.isOneOf(annotation, ModCompatMechanism.LOAD_COMPAT))
 			return annotation;
 		
 		return null;

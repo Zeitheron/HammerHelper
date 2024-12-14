@@ -4,36 +4,35 @@ import com.intellij.patterns.PsiJavaPatterns;
 import com.intellij.psi.*;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
-import org.zeith.hammerhelper.utils.PsiHelper;
-import org.zeith.hammerhelper.utils.SimplyRegisterMechanism;
+import org.zeith.hammerhelper.utils.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
-public class RefReferenceContrib
+public class ModCompatRefContrib
 		extends PsiReferenceContributor
 {
 	protected void fetchReferences(@NotNull PsiElement element, @NotNull ProcessingContext context, @NotNull Consumer<PsiElement> fileConsumer)
 	{
 		if(!(element instanceof PsiLiteralExpression literal)
 		   || !(literal.getParent() instanceof PsiNameValuePair pair)
-		   || !"field".equals(pair.getAttributeName())
+		   || !"modid".equals(pair.getAttributeName())
 		) return;
+		
 		var an = getAnnotationContext(element);
 		if(an == null) return;
 		
-		String field = PsiHelper.getAnnotationAttributeValue(an, "field", "");
-		
-		PsiClass pc = PsiHelper.getClassFromPsiAnnotation(an, "value");
-		if(pc != null) fileConsumer.accept(pc.findFieldByName(field, false));
+		fileConsumer.accept(ModCompatMechanism.gatherModClasses(element, context)
+				.get(PsiHelper.getAnnotationAttributeValue(an, "modid", ""))
+		);
 	}
 	
 	protected PsiAnnotation getAnnotationContext(PsiElement position)
 	{
 		if(position.getParent().getParent() instanceof PsiAnnotationParameterList apr
 		   && apr.getParent() instanceof PsiAnnotation annotation
-		   && PsiHelper.isOneOf(annotation, SimplyRegisterMechanism.REF))
+		   && PsiHelper.isOneOf(annotation, ModCompatMechanism.LOAD_COMPAT))
 			return annotation;
 		return null;
 	}

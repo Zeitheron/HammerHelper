@@ -1,10 +1,13 @@
 package org.zeith.hammerhelper.utils;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTypesUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.*;
 
 public class PsiHelper
@@ -68,6 +71,26 @@ public class PsiHelper
 				.filter(Objects::nonNull)
 				.findFirst()
 				.orElse(null);
+	}
+	
+	public static PsiClass getClassFromPsiAnnotation(PsiAnnotation annotation, String attributeName)
+	{
+		AtomicReference<PsiClass> resolved = new AtomicReference<>();
+		PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+		if(value == null) return null;
+		value.acceptChildren(new PsiElementVisitor()
+		{
+			@Override
+			public void visitElement(@NotNull PsiElement element)
+			{
+				if(element instanceof PsiTypeElement pt)
+				{
+					var pc = PsiTypesUtil.getPsiClass(pt.getType());
+					if(pc != null) resolved.set(pc);
+				}
+			}
+		});
+		return resolved.get();
 	}
 	
 	public static @Nullable PsiAnnotation findFirstAnnotation(PsiModifierListOwner element, String... annotations)
