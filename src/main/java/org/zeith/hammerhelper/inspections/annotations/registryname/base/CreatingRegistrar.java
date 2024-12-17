@@ -29,6 +29,11 @@ public abstract class CreatingRegistrar
 	
 	protected abstract String getQuickFixLabel(String namespace, String registryName, String fieldType, TemplateGenerator generator);
 	
+	protected boolean isEnabled(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session)
+	{
+		return true;
+	}
+	
 	@Override
 	public @NotNull PsiElementVisitor buildVisitor(@NotNull ProblemsHolder holder, boolean isOnTheFly, @NotNull LocalInspectionToolSession session)
 	{
@@ -46,6 +51,8 @@ public abstract class CreatingRegistrar
 				
 				var registryPath = SimplyRegisterMechanism.getRegistryPath(aField);
 				if(registryPath == null) return;
+				
+				if(!isEnabled(holder, isOnTheFly, session)) return;
 				
 				var rn = SimplyRegisterMechanism.findRegistryName(aField);
 				if(rn == null) return;
@@ -77,7 +84,8 @@ public abstract class CreatingRegistrar
 						int lastIdx = directoryPath.lastIndexOf('/');
 						VirtualFile directory = VfsUtil.createDirectories(directoryPath.substring(0, lastIdx));
 						return directory.createChildData(requestor, directoryPath.substring(lastIdx + 1));
-					});
+					}
+					);
 				}
 				
 				holder.registerProblem(rnv, getProblemMessage(qn, tg), ProblemHighlightType.WEAK_WARNING, fixes);

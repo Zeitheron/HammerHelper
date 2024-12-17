@@ -65,6 +65,14 @@
                          language="JAVA"
         />
 
+        <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.MissingItemProperty"
+                         id="HLMissingItemProperty"
+                         displayName="1.21.2+ Item property json is missing."
+                         enabledByDefault="true"
+                         groupName="HammerLib"
+                         language="JAVA"
+        />
+
         <localInspection implementationClass="org.zeith.hammerhelper.inspections.annotations.registryname.MissingBlockstateModel"
                          id="HLMissingBlockModel"
                          displayName="Block state map json is missing."
