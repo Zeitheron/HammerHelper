@@ -1,6 +1,7 @@
 package org.zeith.hammerhelper.utils;
 
 import com.intellij.psi.*;
+import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.psi.util.PsiTypesUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -103,6 +104,13 @@ public class PsiHelper
 		return null;
 	}
 	
+	public static @NotNull List<String> getAnnotationAttributeValueList(PsiAnnotation annotation, String attributeName, List<String> defaultValue)
+	{
+		if(annotation == null) return defaultValue;
+		PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+		return List.of();
+	}
+	
 	public static @Nullable String getAnnotationAttributeValue(PsiAnnotation annotation, String attributeName, String defaultValue)
 	{
 		if(annotation == null) return defaultValue;
@@ -124,6 +132,11 @@ public class PsiHelper
 				{
 				}
 		);
+	}
+	
+	public static PsiAnnotation getContainingAnnotation(PsiElement element)
+	{
+		return PsiTreeUtil.getParentOfType(element, PsiAnnotation.class);
 	}
 	
 	public static void visitExpressionStringRepresentation(PsiAnnotationMemberValue value, BiConsumer<PsiAnnotationMemberValue, String> handled, Consumer<PsiAnnotationMemberValue> unhandled)

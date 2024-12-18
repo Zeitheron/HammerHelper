@@ -73,12 +73,24 @@ public class FileHelper
 	
 	public static VirtualFile getResourcesDirectory(PsiFile from)
 	{
+		VirtualFile baseDir = getModuleDirectory(from);
+		return baseDir != null ? baseDir.findChild("resources") : null;
+	}
+	
+	public static VirtualFile getModuleDirectory(PsiFile from)
+	{
 		Project project = from.getProject();
 		var vf = from.getVirtualFile();
+		
+		if(vf == null)
+		{
+			from = from.getOriginalFile();
+			vf = from.getVirtualFile();
+		}
+		
 		if(vf == null) return null;
 		ProjectFileIndex indices = ProjectFileIndex.getInstance(project);
-		VirtualFile baseDir = indices.getContentRootForFile(vf);
-		return baseDir != null ? baseDir.findChild("resources") : null;
+		return indices.getContentRootForFile(vf);
 	}
 	
 	public static List<Namespace> getAllAssetNamespaces(PsiFile file)

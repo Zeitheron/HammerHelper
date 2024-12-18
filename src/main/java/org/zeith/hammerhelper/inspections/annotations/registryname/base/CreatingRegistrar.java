@@ -98,12 +98,6 @@ public abstract class CreatingRegistrar
 		return FileHelper.getAllAssetNamespaces(element.getContainingFile());
 	}
 	
-	public interface TemplateGenerator
-			extends TemplateFactory
-	{
-		String getAssetsPath();
-	}
-	
 	public static TemplateGenerator withFixedPath(String path, TemplateFactory templateFactory)
 	{
 		return new TemplateGenerator()
@@ -120,6 +114,12 @@ public abstract class CreatingRegistrar
 				return templateFactory.createTemplate(namespace, registryName, field);
 			}
 		};
+	}
+	
+	public interface TemplateGenerator
+			extends TemplateFactory
+	{
+		String getAssetsPath();
 	}
 	
 	public interface TemplateFactory
