@@ -24,6 +24,7 @@ dependencies {
 
     intellijPlatform {
         intellijIdeaCommunity(icVersion)
+//        intellijIdeaUltimate(icVersion)
 
 //        plugins(providers.gradleProperty("platformPlugins").map { it.split(',') })
 

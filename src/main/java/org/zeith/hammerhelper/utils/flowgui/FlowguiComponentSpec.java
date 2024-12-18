@@ -6,14 +6,13 @@ import com.intellij.psi.PsiField;
 import org.zeith.hammerhelper.utils.PsiHelper;
 import org.zeith.hammerhelper.utils.ResourceLocation;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
-public record FlowguiComponentSpec(ResourceLocation id, Map<String, FlowguiPropertySpec> fields)
+public record FlowguiComponentSpec(PsiClass owner, ResourceLocation id, Map<String, FlowguiPropertySpec> fields)
 {
 	public static FlowguiComponentSpec fromPsi(ResourceLocation id, PsiClass psi)
 	{
-		Map<String, FlowguiPropertySpec> fields = new HashMap<>();
+		Map<String, FlowguiPropertySpec> fields = new LinkedHashMap<>();
 		
 		for(PsiField f : psi.getAllFields())
 		{
@@ -31,6 +30,6 @@ public record FlowguiComponentSpec(ResourceLocation id, Map<String, FlowguiPrope
 			if(spec != null) fields.put(xmlName, spec);
 		}
 		
-		return new FlowguiComponentSpec(id, Map.copyOf(fields));
+		return new FlowguiComponentSpec(psi, id, Collections.unmodifiableMap(fields));
 	}
 }

@@ -13,10 +13,10 @@ import java.util.*;
 
 import static org.zeith.hammerhelper.utils.FileHelper.getRecursive;
 
-public class FlowguiXmlContributor
+public class FlowguiXmlAnnotationContributor
 		extends CompletionContributor
 {
-	public FlowguiXmlContributor()
+	public FlowguiXmlAnnotationContributor()
 	{
 		extend(CompletionType.BASIC,
 				PlatformPatterns.psiElement().inside(PsiLiteralExpression.class),

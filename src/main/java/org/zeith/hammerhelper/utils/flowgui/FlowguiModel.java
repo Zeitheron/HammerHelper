@@ -1,5 +1,6 @@
 package org.zeith.hammerhelper.utils.flowgui;
 
+import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -18,6 +19,7 @@ public class FlowguiModel
 	private static final Key<FlowguiModel> MOD_CLASSES_RESULT = Key.create("hammerhelper flowgui model cache");
 	
 	private final Map<String, FlowguiComponentSpec> specs = new HashMap<>();
+	private final Map<String, String> predefinedTagComponents = new HashMap<>();
 	
 	public static final String[] XML_FLOWGUI = {
 			"org.zeith.hammerlib.client.flowgui.reader.XmlFlowgui"
@@ -26,6 +28,16 @@ public class FlowguiModel
 	public void register(ResourceLocation id, FlowguiComponentSpec spec)
 	{
 		specs.putIfAbsent(id.toString(), spec);
+	}
+	
+	public void registerTagComponent(String tag, String id)
+	{
+		predefinedTagComponents.putIfAbsent(tag, id);
+	}
+	
+	public String findComponentIdFromTag(String tag)
+	{
+		return predefinedTagComponents.get(tag);
 	}
 	
 	public FlowguiComponentSpec findSpec(String id)
@@ -48,6 +60,22 @@ public class FlowguiModel
 		GlobalSearchScope scope = GlobalSearchScope.everythingScope(anything.getProject());
 		
 		FlowguiModel model = new FlowguiModel();
+		
+		PsiClass flowguiTags = facade.findClass("org.zeith.hammerlib.client.flowgui.reader.FlowguiTags", scope);
+		if(flowguiTags != null)
+			for(PsiField field : flowguiTags.getFields())
+			{
+				if(field.getName().startsWith("COM_")
+				   && field.hasModifier(JvmModifier.STATIC)
+				   && field.hasModifier(JvmModifier.FINAL)
+				   && field.getType().equalsToText("java.lang.String")
+				)
+				{
+					String tagType = field.getName().substring(4);
+					String value = PsiHelper.getExpressionStringRepresentation(field.getInitializer(), "");
+					model.registerTagComponent(tagType, value);
+				}
+			}
 		
 		PsiClass readerAnnotation = facade.findClass("org.zeith.hammerlib.client.flowgui.reader.FlowguiReader", scope);
 		if(readerAnnotation == null) return model;

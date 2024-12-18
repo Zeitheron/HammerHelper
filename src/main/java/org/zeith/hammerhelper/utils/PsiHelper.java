@@ -108,6 +108,12 @@ public class PsiHelper
 	{
 		if(annotation == null) return defaultValue;
 		PsiAnnotationMemberValue value = annotation.findAttributeValue(attributeName);
+		if(value instanceof PsiArrayInitializerMemberValue arr)
+			return Arrays.stream(arr.getInitializers())
+					.map(e -> getExpressionStringRepresentation(e, ""))
+					.toList();
+		var res = getExpressionStringRepresentation(value, "");
+		if(res != null && !res.isBlank()) return List.of(res);
 		return List.of();
 	}
 	

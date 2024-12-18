@@ -10,17 +10,30 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public record FlowguiPropertySpec(
+		PsiField owner,
 		@Nullable String defaultValue,
 		boolean required, boolean allowJs,
 		@NotNull List<FileRefByRegex> fileReferences,
 		@NotNull List<Pattern> allowedValues
 )
 {
+	public static final Pattern JS_START = Pattern.compile("^\\s*\\([^)]*\\)\\s*=>\\s*");
+	
+	public static boolean isJSCode(String input)
+	{
+		return JS_START.matcher(input).find();
+	}
+	
+	public boolean treatAsJs(String input)
+	{
+		return input != null && allowJs() && isJSCode(input);
+	}
+	
 	public static FlowguiPropertySpec fromPsi(PsiField field)
 	{
 		var def = HammerLibIDE.getDefault(field);
 		if(def.isBlank()) def = null;
-		return new FlowguiPropertySpec(
+		return new FlowguiPropertySpec(field,
 				def,
 				HammerLibIDE.isRequired(field),
 				HammerLibIDE.isJsAllowed(field),

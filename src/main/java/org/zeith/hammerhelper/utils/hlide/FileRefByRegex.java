@@ -10,9 +10,11 @@ public record FileRefByRegex(Pattern regex, String path)
 		var m = regex.matcher(input);
 		if(!m.find()) return Optional.empty();
 		
-		for(String group : m.namedGroups().keySet())
-			input = input.replace("%" + group + "%", m.group(group));
+		String path = path();
 		
-		return Optional.empty();
+		for(String group : m.namedGroups().keySet())
+			path = path.replace("%" + group + "%", m.group(group));
+		
+		return Optional.of(path);
 	}
 }

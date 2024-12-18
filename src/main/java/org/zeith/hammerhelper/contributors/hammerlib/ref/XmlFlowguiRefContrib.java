@@ -30,6 +30,8 @@ public class XmlFlowguiRefContrib
 		String field = PsiHelper.getAnnotationAttributeValue(an, "value", "");
 		if(field.isBlank()) return;
 		
+		FlowguiModel model = FlowguiModel.fromProject(element, context);
+		
 		forEachAssetsNamespace(element, namespace ->
 				{
 					var sub = getRecursive(namespace, "flowgui");
