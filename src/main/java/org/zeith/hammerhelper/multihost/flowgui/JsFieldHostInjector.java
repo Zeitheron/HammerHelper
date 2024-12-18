@@ -1,10 +1,8 @@
 package org.zeith.hammerhelper.multihost.flowgui;
 
-import com.intellij.json.JsonLanguage;
 import com.intellij.lang.Language;
 import com.intellij.lang.injection.MultiHostInjector;
 import com.intellij.lang.injection.MultiHostRegistrar;
-import com.intellij.lang.java.JavaLanguage;
 import com.intellij.openapi.util.TextRange;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiLanguageInjectionHost;
@@ -13,13 +11,12 @@ import com.intellij.psi.xml.XmlAttributeValue;
 import com.intellij.util.ProcessingContext;
 import com.intellij.util.SharedProcessingContext;
 import org.jetbrains.annotations.NotNull;
-import org.zeith.hammerhelper.contributors.hammerlib.flowgui.FlowguiXmlFileContributor;
 import org.zeith.hammerhelper.utils.FileHelper;
 import org.zeith.hammerhelper.utils.flowgui.*;
 
 import java.util.List;
 
-import static org.zeith.hammerhelper.contributors.hammerlib.flowgui.FlowguiXmlFileContributor.FLOWGUI;
+import static org.zeith.hammerhelper.contributors.hammerlib.flowgui.FlowguiXmlFileRefContributor.FLOWGUI;
 
 // Sadly this is for ultimate version only, but for those who have it -- enjoy!
 public class JsFieldHostInjector
@@ -44,7 +41,7 @@ public class JsFieldHostInjector
 		
 		ProcessingContext ctx = new ProcessingContext(new SharedProcessingContext());
 		if(FileHelper.findAssetRoot(context.getContainingFile(), ctx, FLOWGUI) == null) return;
-		var clazz = FlowguiXmlFileContributor.componentClass(tag, ctx).orElse(null);
+		var clazz = FlowguiModel.componentClass(tag, ctx).orElse(null);
 		if(clazz == null) return;
 		
 		var model = FlowguiModel.fromProject(context, ctx);

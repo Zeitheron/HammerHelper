@@ -1,7 +1,8 @@
 package org.zeith.hammerhelper.utils;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.*;
+import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.psi.PsiFile;
@@ -11,6 +12,7 @@ import org.zeith.hammerhelper.configs.namespaces.NamespaceConfigsHH;
 
 import java.nio.file.Path;
 import java.util.*;
+import java.util.function.Consumer;
 
 public class FileHelper
 {
@@ -166,5 +168,41 @@ public class FileHelper
 			}
 		}
 		return files;
+	}
+	
+	public static List<VirtualFile> listFiles(Project project, String path)
+	{
+		List<VirtualFile> files = new ArrayList<>();
+		findFiles(project, path, vf ->
+				{
+					if(vf != null && vf.exists())
+						files.add(vf);
+				}
+		);
+		return files;
+	}
+	
+	public static void findFiles(Project project, String path, Consumer<VirtualFile> callback)
+	{
+		OrderEnumerator.orderEntries(project)
+				.librariesOnly()
+				.forEachLibrary(library ->
+				{
+					VirtualFile vf = findFileInLibrary(library, path);
+					if(vf != null) callback.accept(vf);
+					return false;
+				});
+	}
+	
+	@Nullable
+	private static VirtualFile findFileInLibrary(Library library, String fileName)
+	{
+		for(VirtualFile root : library.getFiles(OrderRootType.CLASSES))
+		{
+			VirtualFile targetFile = root.findFileByRelativePath(fileName);
+			if(targetFile != null && !targetFile.isDirectory())
+				return targetFile;
+		}
+		return null;
 	}
 }

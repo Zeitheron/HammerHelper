@@ -6,13 +6,14 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.search.searches.ReferencesSearch;
 import com.intellij.psi.util.PsiUtil;
+import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
+import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.PsiHelper;
 import org.zeith.hammerhelper.utils.ResourceLocation;
 import org.zeith.hammerhelper.utils.hlide.HammerLibIDE;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class FlowguiModel
 {
@@ -24,6 +25,23 @@ public class FlowguiModel
 	public static final String[] XML_FLOWGUI = {
 			"org.zeith.hammerlib.client.flowgui.reader.XmlFlowgui"
 	};
+	
+	public static Optional<String> componentClass(XmlTag tag, @NotNull ProcessingContext context)
+	{
+		FlowguiModel model = fromProject(tag, context);
+		String classValue = tag.getAttributeValue("class");
+		if(classValue == null || classValue.isBlank())
+		{
+			String comType = model.findComponentIdFromTag(tag.getName());
+			if(comType != null) classValue = comType;
+		}
+		return Optional.ofNullable(classValue);
+	}
+	
+	public Set<String> getSpecs()
+	{
+		return specs.keySet();
+	}
 	
 	public void register(ResourceLocation id, FlowguiComponentSpec spec)
 	{

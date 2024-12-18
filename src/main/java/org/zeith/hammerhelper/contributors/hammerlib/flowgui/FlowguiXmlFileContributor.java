@@ -1,156 +1,154 @@
 package org.zeith.hammerhelper.contributors.hammerlib.flowgui;
 
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.patterns.PatternCondition;
+import com.intellij.codeInsight.completion.*;
+import com.intellij.codeInsight.lookup.LookupElementBuilder;
 import com.intellij.patterns.PlatformPatterns;
-import com.intellij.psi.*;
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import com.intellij.psi.xml.*;
-import com.intellij.util.Consumer;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
-import org.zeith.hammerhelper.contributors.refs.ToVirtualFilesRefContributor;
-import org.zeith.hammerhelper.utils.*;
-import org.zeith.hammerhelper.utils.flowgui.*;
-import org.zeith.hammerhelper.utils.hlide.FileRefByRegex;
+import org.zeith.hammerhelper.utils.FileHelper;
+import org.zeith.hammerhelper.utils.flowgui.FlowguiComponentSpec;
+import org.zeith.hammerhelper.utils.flowgui.FlowguiModel;
 
 import java.util.*;
 
+import static org.zeith.hammerhelper.contributors.hammerlib.flowgui.FlowguiXmlFileRefContributor.FLOWGUI;
 import static org.zeith.hammerhelper.utils.FileHelper.getRecursive;
 
 public class FlowguiXmlFileContributor
-		extends PsiReferenceContributor
+		extends CompletionContributor
 {
-	public static final KeyedPrefixPath FLOWGUI = KeyedPrefixPath.of("flowgui");
-	
-	@Override
-	public void registerReferenceProviders(@NotNull PsiReferenceRegistrar reg)
+	public FlowguiXmlFileContributor()
 	{
-		var flowguiXmlFile = PlatformPatterns.psiFile().with(new PsiFilePatternCondition());
-		
-		var xmlAttribValPattern = PlatformPatterns.psiElement(XmlAttributeValue.class).inFile(flowguiXmlFile);
-		
-		reg.registerReferenceProvider(xmlAttribValPattern, new PsiReferenceProvider()
+		extend(CompletionType.BASIC,
+				PlatformPatterns.psiElement(XmlToken.class),
+				new CompletionProvider<>()
 				{
 					@Override
-					public PsiReference @NotNull [] getReferencesByElement(@NotNull PsiElement psi, @NotNull ProcessingContext context)
+					protected void addCompletions(@NotNull CompletionParameters parameters,
+												  @NotNull ProcessingContext context,
+												  @NotNull CompletionResultSet result
+					)
 					{
-						if(!(psi instanceof XmlAttributeValue val)) return PsiReference.EMPTY_ARRAY;
-						if(!(val.getParent() instanceof XmlAttribute attrib)) return PsiReference.EMPTY_ARRAY;
-						if(!(attrib.getParent() instanceof XmlTag tag)) return PsiReference.EMPTY_ARRAY;
+						PsiElement element = parameters.getPosition();
+						if(!(element instanceof XmlToken token))
+							return;
 						
-						List<PsiReference> refs = new ArrayList<>();
+						if(FileHelper.findAssetRoot(parameters.getOriginalFile(), context, FLOWGUI) == null)
+							return;
 						
-						componentClass(tag, context).ifPresent(id ->
-								contributeComponentString(id, attrib, val, context, refs::add)
-						);
+						var par = token.getParent();
 						
-						switch(tag.getName())
+						FlowguiModel model = FlowguiModel.fromProject(par, context);
+						if(model.getSpecs().isEmpty())
+							return;
+						
+						if(par instanceof XmlAttributeValue val && val.getParent() instanceof XmlAttribute attrib)
 						{
-							case "import" -> contributeImport(attrib, val, context, refs::add);
+							var tag = attrib.getParent();
+							
+							var clazz = FlowguiModel.componentClass(attrib.getParent(), context).orElse(null);
+							
+							switch(tag.getName())
+							{
+								case "import" -> importProcessing(val, attrib, context, result, model, clazz);
+								case "com" -> componentProcessing(val, attrib, context, result, model, clazz);
+							}
+							
+							result.stopHere();
+						} else if(par instanceof XmlAttribute attrib)
+						{
+							var tag = attrib.getParent();
+							var clazz = FlowguiModel.componentClass(tag, context).orElse(null);
+							if("import".equals(tag.getName())) clazz = model.findComponentIdFromTag("empty");
+							
+							comKeyProcessing(attrib.getParent(), result, model, clazz);
 						}
-						
-						return refs.toArray(PsiReference[]::new);
 					}
 				}
 		);
 	}
 	
-	public static Optional<String> componentClass(XmlTag tag, @NotNull ProcessingContext context)
+	public void comKeyProcessing(
+			XmlTag tag,
+			@NotNull CompletionResultSet result,
+			@NotNull FlowguiModel model,
+			String clazz
+	)
 	{
-		FlowguiModel model = FlowguiModel.fromProject(tag, context);
-		String classValue = tag.getAttributeValue("class");
-		if(classValue == null || classValue.isBlank())
+		FlowguiComponentSpec spec = model.findSpec(clazz);
+		if(spec == null) return;
+		List<LookupElementBuilder> list = new ArrayList<>();
+		Set<String> suggested = new HashSet<>();
+		
+		var keysSorted = spec.fields().entrySet()
+				.stream()
+				.sorted(Map.Entry.comparingByKey())
+				.toList();
+		
+		for(var e : keysSorted)
 		{
-			String comType = model.findComponentIdFromTag(tag.getName());
-			if(comType != null) classValue = comType;
+			var s = e.getKey();
+			if("class".equals(s) || tag.getAttribute(s) != null || !suggested.add(s)) continue;
+			list.add(LookupElementBuilder.create(s));
 		}
-		return Optional.ofNullable(classValue);
+		
+		result.addAllElements(list);
 	}
 	
-	protected void contributeImport(XmlAttribute attrib, XmlAttributeValue cursor, @NotNull ProcessingContext context, Consumer<PsiReference> ref)
+	public void componentProcessing(XmlAttributeValue cursor, XmlAttribute attrib,
+									@NotNull ProcessingContext context,
+									@NotNull CompletionResultSet result,
+									@NotNull FlowguiModel model,
+									String clazz
+	)
 	{
-		var field = attrib.getName();
-		
-		if("from".equals(field))
+		var tag = attrib.getParent();
+		if("class".equals(attrib.getName()) && "com".equals(tag.getName()))
 		{
-			var id = ResourceLocation.parse(attrib.getValue());
-			var path = ("assets/" + id.namespace() + "/flowgui/" + id.path() + ".xml").split("/");
-			
-			VirtualFile module = FileHelper.getResourcesDirectory(attrib.getContainingFile().getOriginalFile());
-			
-			var dst = getRecursive(module, path);
-			if(dst != null)
-				ref.accept(new ToVirtualFilesRefContributor.VirtualFilePsiReference(cursor, dst));
-			
+			result.addAllElements(model.getSpecs().stream().map(LookupElementBuilder::create).toList());
 			return;
 		}
-		
 	}
 	
-	protected void contributeComponentString(String comId, XmlAttribute attrib, XmlAttributeValue cursor, @NotNull ProcessingContext context, Consumer<PsiReference> ref)
+	public void importProcessing(XmlAttributeValue cursor, XmlAttribute attrib,
+								 @NotNull ProcessingContext context,
+								 @NotNull CompletionResultSet result,
+								 @NotNull FlowguiModel model,
+								 String clazz
+	)
 	{
-		var field = attrib.getName();
-		
-		FlowguiModel model = FlowguiModel.fromProject(cursor, context);
-		FlowguiComponentSpec spec = model.findSpec(comId);
-		if(spec == null) return;
-		
-		if("class".equals(field))
+		var tag = attrib.getParent();
+		if("from".equals(attrib.getName()))
 		{
-			ref.accept(PsiReferenceBase.createSelfReference(cursor, spec.owner()));
+			result.addAllElements(
+					getXmlFiles(cursor.getContainingFile())
+							.stream()
+							.map(LookupElementBuilder::create)
+							.toList()
+			);
 			return;
 		}
-		
-		VirtualFile module = FileHelper.getModuleDirectory(attrib.getContainingFile().getOriginalFile());
-		
-		FlowguiPropertySpec fieldSpec = spec.fields().get(field);
-		if(fieldSpec != null)
-		{
-			List<FileRefByRegex> refs = fieldSpec.fileReferences();
-			for(FileRefByRegex fr : refs)
-			{
-				var file = fr.resolve(attrib.getValue()).orElse(null);
-				if(file == null) continue;
-				var dst = FileHelper.getRecursive(module, file.split("/"));
-				if(dst != null)
-					ref.accept(new ToVirtualFilesRefContributor.VirtualFilePsiReference(cursor, dst));
-			}
-		}
 	}
 	
-	protected void contributeComponentName(XmlAttribute attrib, XmlAttributeValue cursor, @NotNull ProcessingContext context, Consumer<PsiReference> ref)
-	{
-		var field = attrib.getName();
-		
-		FlowguiModel model = FlowguiModel.fromProject(cursor, context);
-		FlowguiComponentSpec spec = componentClass(attrib.getParent(), context).map(model::findSpec).orElse(null);
-		if(spec == null) return;
-		
-		FlowguiPropertySpec fieldSpec = spec.fields().get(field);
-		if(fieldSpec != null)
-			ref.accept(PsiReferenceBase.createSelfReference(attrib, fieldSpec.owner()));
-	}
 	
-	protected void refToComponentType(PsiElement cursor, String id, @NotNull ProcessingContext context, Consumer<PsiReference> ref)
+	private List<String> getXmlFiles(PsiFile file)
 	{
-		FlowguiModel model = FlowguiModel.fromProject(cursor, context);
-		FlowguiComponentSpec spec = model.findSpec(id);
-		if(spec != null)
-			ref.accept(PsiReferenceBase.createSelfReference(cursor, spec.owner()));
-	}
-	
-	private static class PsiFilePatternCondition
-			extends PatternCondition<PsiFile>
-	{
-		public PsiFilePatternCondition()
+		List<String> names = new ArrayList<>();
+		
+		for(var namespace : FileHelper.getAllAssetNamespaces(file))
 		{
-			super("PsiFilePatternCondition");
+			var sub = getRecursive(namespace.file(), "flowgui");
+			names.addAll(FileHelper.getRecursiveFilesNamesWithFullPathFromDirectory(sub)
+					.stream()
+					.filter(s -> s.endsWith(".xml"))
+					.map(s -> namespace.name() + ":" + s.substring(0, s.lastIndexOf(".")))
+					.toList()
+			);
 		}
 		
-		@Override
-		public boolean accepts(@NotNull PsiFile file, ProcessingContext context)
-		{
-			return FileHelper.findAssetRoot(file, context, FLOWGUI) != null;
-		}
+		return names;
 	}
 }

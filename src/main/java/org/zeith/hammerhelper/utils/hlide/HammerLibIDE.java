@@ -12,9 +12,16 @@ import java.util.regex.Pattern;
 @Slf4j
 public class HammerLibIDE
 {
+	public static final String PACKAGE = "org.zeith.hammerlib.annotations.ide.";
+	
+	public static final String FileReference = PACKAGE + "FileReference";
+	public static final String AllowedValues = PACKAGE + "AllowedValues";
+	public static final String Required = PACKAGE + "Required";
+	public static final String AllowJS = PACKAGE + "AllowJS";
+	
 	public static List<FileRefByRegex> getFileReferences(PsiModifierListOwner element)
 	{
-		PsiAnnotation ref = PsiHelper.findFirstAnnotation(element, "org.zeith.hammerlib.annotations.ide.FileReference");
+		PsiAnnotation ref = PsiHelper.findFirstAnnotation(element, FileReference);
 		if(ref == null) return List.of();
 		
 		List<String> regex = PsiHelper.getAnnotationAttributeValueList(ref, "regex", List.of());
@@ -38,7 +45,7 @@ public class HammerLibIDE
 	
 	public static List<Pattern> getAllowedValues(PsiModifierListOwner element)
 	{
-		PsiAnnotation ref = PsiHelper.findFirstAnnotation(element, "org.zeith.hammerlib.annotations.ide.AllowedValues");
+		PsiAnnotation ref = PsiHelper.findFirstAnnotation(element, AllowedValues);
 		if(ref == null) return List.of();
 		
 		List<String> value = PsiHelper.getAnnotationAttributeValueList(ref, "value", List.of());
@@ -63,7 +70,7 @@ public class HammerLibIDE
 	{
 		return getValue(element,
 				"minecraft",
-				"org.zeith.hammerlib.annotations.ide.Namespace"
+				PACKAGE + "Namespace"
 		);
 	}
 	
@@ -71,18 +78,18 @@ public class HammerLibIDE
 	{
 		return getValue(element,
 				"",
-				"org.zeith.hammerlib.annotations.ide.Default"
+				PACKAGE + "Default"
 		);
 	}
 	
 	public static boolean isRequired(PsiModifierListOwner element)
 	{
-		return PsiHelper.findFirstAnnotation(element, "org.zeith.hammerlib.annotations.ide.Required") != null;
+		return PsiHelper.findFirstAnnotation(element, Required) != null;
 	}
 	
 	public static boolean isJsAllowed(PsiModifierListOwner element)
 	{
-		return PsiHelper.findFirstAnnotation(element, "org.zeith.hammerlib.annotations.ide.AllowJS") != null;
+		return PsiHelper.findFirstAnnotation(element, AllowJS) != null;
 	}
 	
 	public static String getValue(PsiModifierListOwner element, String defaultValue, String... annotationTypes)
