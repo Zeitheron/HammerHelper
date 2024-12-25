@@ -1,6 +1,7 @@
 package org.zeith.hammerhelper.inspections.xml;
 
 import com.intellij.codeInspection.*;
+import com.intellij.openapi.util.TextRange;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
 import com.intellij.psi.xml.*;
@@ -12,7 +13,8 @@ import org.zeith.hammerhelper.utils.FileHelper;
 import org.zeith.hammerhelper.utils.ResourceLocation;
 import org.zeith.hammerhelper.utils.flowgui.*;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static org.zeith.hammerhelper.contributors.hammerlib.flowgui.FlowguiXmlFileRefContributor.FLOWGUI;
@@ -58,16 +60,14 @@ public class FlowguiInspection
 						{
 							var id = ResourceLocation.parse(from.getValue());
 							
-							List<VirtualFile> dst = FlowguiLocator.findXmlFile(id, tag);
+							VirtualFile dst = FlowguiLocator.findXmlFile(id, tag, ctx);
 							
-							if(dst.isEmpty())
+							if(dst == null)
 							{
 								PsiElement el = from.getValueElement();
 								if(el == null) el = from;
 								holder.registerProblem(el, "The import could not be resolved.", ProblemHighlightType.ERROR);
-							}
-							
-							if(dst.stream().map(VirtualFile::getUrl).anyMatch(from.getContainingFile().getVirtualFile().getUrl()::equals))
+							} else if(dst.getUrl().equals(from.getContainingFile().getVirtualFile().getUrl()))
 							{
 								PsiElement el = from.getValueElement();
 								if(el == null) el = from;
@@ -132,7 +132,9 @@ public class FlowguiInspection
 					{
 						PsiElement el = valueAttrib.getValueElement();
 						if(el == null) el = valueAttrib;
-						holder.registerProblem(el, "Value is not allowed.", ProblemHighlightType.ERROR);
+						TextRange range = el.getTextRange();
+						if(range.getStartOffset() < range.getEndOffset())
+							holder.registerProblem(el, "Value is not allowed.", ProblemHighlightType.ERROR);
 					}
 				}
 			}

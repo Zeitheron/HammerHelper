@@ -5,6 +5,7 @@ import com.intellij.openapi.roots.*;
 import com.intellij.openapi.roots.libraries.Library;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
+import com.intellij.psi.PsiDirectory;
 import com.intellij.psi.PsiFile;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.Nullable;
@@ -29,7 +30,19 @@ public class FileHelper
 		Stack<String> prefixes = new Stack<>();
 		prefixes.addAll(List.of(prefix.split("/")));
 		
-		VirtualFile res = getRecursive(getResourcesDirectory(file), "assets");
+		VirtualFile res = null;
+		PsiDirectory parent = file.getParent();
+		while(parent != null)
+		{
+			var n = parent.getName();
+			if(n.equalsIgnoreCase("assets"))
+			{
+				res = parent.getVirtualFile();
+				break;
+			}
+			parent = parent.getParentDirectory();
+		}
+		
 		if(res == null)
 		{
 			context.put(ASSET_ROOT, Optional.empty());

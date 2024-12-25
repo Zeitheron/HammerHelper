@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.configs.general.GeneralConfigsHH;
 import org.zeith.hammerhelper.contributors.refs.ToVirtualFilesRefContributor;
 import org.zeith.hammerhelper.utils.*;
+import org.zeith.hammerhelper.utils.resources.ResourceLocator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,8 +40,6 @@ public class McBlockStateRefContrib
 						
 						List<PsiReference> refs = new ArrayList<>();
 						
-						VirtualFile assets = FileHelper.findAssetRoot(element.getContainingFile(), context, BLOCKSTATES);
-						
 						if(element instanceof JsonStringLiteral literal
 						   && literal.getParent() instanceof JsonProperty prop
 						   && prop.getParent() instanceof JsonObject obj
@@ -57,8 +56,7 @@ public class McBlockStateRefContrib
 							{
 								String[] path = ResourceLocationChecks.split(literal.getValue());
 								
-								var s = (path[0] + "/models/" + path[1] + ".json").split("/");
-								VirtualFile modelFile = FileHelper.getRecursive(assets, s);
+								VirtualFile modelFile = ResourceLocator.findAssetResourceInProject(element, path[0] + "/models/" + path[1] + ".json", context);
 								
 								if(modelFile != null)
 									refs.add(new ToVirtualFilesRefContributor.VirtualFilePsiReference(element, modelFile));
@@ -66,8 +64,7 @@ public class McBlockStateRefContrib
 							{
 								String[] path = ResourceLocationChecks.split(literal.getValue());
 								
-								var s = (path[0] + "/textures/" + path[1] + ".png").split("/");
-								VirtualFile modelFile = FileHelper.getRecursive(assets, s);
+								VirtualFile modelFile = ResourceLocator.findAssetResourceInProject(element, path[0] + "/textures/" + path[1] + ".png", context);
 								
 								if(modelFile != null)
 									refs.add(new ToVirtualFilesRefContributor.VirtualFilePsiReference(element, modelFile));

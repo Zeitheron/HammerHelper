@@ -1,6 +1,5 @@
 package org.zeith.hammerhelper.contributors.hammerlib.flowgui;
 
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.*;
 import com.intellij.psi.*;
 import com.intellij.psi.xml.*;
@@ -11,6 +10,7 @@ import org.zeith.hammerhelper.contributors.refs.ToVirtualFilesRefContributor;
 import org.zeith.hammerhelper.utils.*;
 import org.zeith.hammerhelper.utils.flowgui.*;
 import org.zeith.hammerhelper.utils.hlide.FileRefByRegex;
+import org.zeith.hammerhelper.utils.resources.ResourceLocator;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,12 +75,8 @@ public class FlowguiXmlFileRefContributor
 		
 		if("from".equals(field))
 		{
-			var id = ResourceLocation.parse(attrib.getValue());
-			
-			FlowguiLocator.findXmlFile(id, attrib)
-					.forEach(vf ->
-							ref.accept(new ToVirtualFilesRefContributor.VirtualFilePsiReference(cursor, vf))
-					);
+			var vf = FlowguiLocator.findXmlFile(ResourceLocation.parse(attrib.getValue()), attrib, context);
+			if(vf != null) ref.accept(new ToVirtualFilesRefContributor.VirtualFilePsiReference(cursor, vf));
 		}
 		
 	}
@@ -99,8 +95,6 @@ public class FlowguiXmlFileRefContributor
 			return;
 		}
 		
-		VirtualFile module = FileHelper.getModuleDirectory(attrib.getContainingFile().getOriginalFile());
-		
 		FlowguiPropertySpec fieldSpec = spec.fields().get(field);
 		if(fieldSpec != null)
 		{
@@ -109,7 +103,7 @@ public class FlowguiXmlFileRefContributor
 			{
 				var file = fr.resolve(attrib.getValue()).orElse(null);
 				if(file == null) continue;
-				var dst = FileHelper.getRecursive(module, file.split("/"));
+				var dst = ResourceLocator.findResourceInProject(attrib, file, context);
 				if(dst != null)
 					ref.accept(new ToVirtualFilesRefContributor.VirtualFilePsiReference(cursor, dst));
 			}
