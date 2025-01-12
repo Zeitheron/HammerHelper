@@ -15,7 +15,8 @@ public record FlowguiPropertySpec(
 		@Nullable String defaultValue,
 		boolean required, boolean allowJs,
 		@NotNull List<FileRefByRegex> fileReferences,
-		@NotNull List<Pattern> allowedValues
+		@NotNull List<Pattern> allowedValues,
+		@NotNull List<String> suggestions
 )
 {
 	public static final Pattern JS_START = Pattern.compile("^\\s*\\([^)]*\\)\\s*=>\\s*");
@@ -47,7 +48,8 @@ public record FlowguiPropertySpec(
 				required != null,
 				HammerLibIDE.isJsAllowed(field),
 				HammerLibIDE.getFileReferences(field),
-				HammerLibIDE.getAllowedValues(field)
+				HammerLibIDE.getAllowedValues(field),
+				HammerLibIDE.getSuggestions(field)
 		);
 	}
 }

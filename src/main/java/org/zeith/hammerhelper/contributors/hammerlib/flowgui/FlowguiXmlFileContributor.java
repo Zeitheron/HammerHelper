@@ -9,8 +9,7 @@ import com.intellij.psi.xml.*;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.FileHelper;
-import org.zeith.hammerhelper.utils.flowgui.FlowguiComponentSpec;
-import org.zeith.hammerhelper.utils.flowgui.FlowguiModel;
+import org.zeith.hammerhelper.utils.flowgui.*;
 
 import java.util.*;
 
@@ -51,18 +50,22 @@ public class FlowguiXmlFileContributor
 							
 							var clazz = FlowguiModel.componentClass(attrib.getParent(), context).orElse(null);
 							
-							switch(tag.getName())
-							{
-								case "import" -> importProcessing(val, attrib, context, result, model, clazz);
-								case "com" -> componentProcessing(val, attrib, context, result, model, clazz);
-							}
+							if(tag.getName().equals("import"))
+								importProcessing(val, attrib, context, result, model, clazz);
+							else
+								componentProcessing(val, attrib, context, result, model, clazz);
 							
 							result.stopHere();
 						} else if(par instanceof XmlAttribute attrib)
 						{
 							var tag = attrib.getParent();
 							var clazz = FlowguiModel.componentClass(tag, context).orElse(null);
-							if("import".equals(tag.getName())) clazz = model.findComponentIdFromTag("empty");
+							
+							clazz = switch(tag.getName())
+							{
+								case "import", "root" -> model.findComponentIdFromTag("empty");
+								default -> clazz;
+							};
 							
 							comKeyProcessing(attrib.getParent(), result, model, clazz);
 						}
@@ -105,12 +108,18 @@ public class FlowguiXmlFileContributor
 									String clazz
 	)
 	{
+		var an = attrib.getName();
 		var tag = attrib.getParent();
-		if("class".equals(attrib.getName()) && "com".equals(tag.getName()))
+		if("class".equals(an) && "com".equals(tag.getName()))
 		{
 			result.addAllElements(model.getSpecs().stream().map(LookupElementBuilder::create).toList());
 			return;
 		}
+		
+		var spec = model.findSpec(clazz);
+		FlowguiPropertySpec field;
+		if(spec != null && (field = spec.fields().get(an)) != null)
+			result.addAllElements(field.suggestions().stream().map(LookupElementBuilder::create).toList());
 	}
 	
 	public void importProcessing(XmlAttributeValue cursor, XmlAttribute attrib,

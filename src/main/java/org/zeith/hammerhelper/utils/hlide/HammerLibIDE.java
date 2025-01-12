@@ -3,6 +3,7 @@ package org.zeith.hammerhelper.utils.hlide;
 import com.intellij.psi.PsiAnnotation;
 import com.intellij.psi.PsiModifierListOwner;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.PsiHelper;
 
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class HammerLibIDE
 	public static final String AllowedValues = PACKAGE + "AllowedValues";
 	public static final String Required = PACKAGE + "Required";
 	public static final String AllowJS = PACKAGE + "AllowJS";
+	public static final String Suggestions = PACKAGE + "Suggestions";
 	
 	public static List<FileRefByRegex> getFileReferences(PsiModifierListOwner element)
 	{
@@ -92,9 +94,23 @@ public class HammerLibIDE
 		return PsiHelper.findFirstAnnotation(element, AllowJS) != null;
 	}
 	
+	public static List<String> getSuggestions(PsiModifierListOwner element)
+	{
+		return getValues(element, List.of(), Suggestions);
+	}
+	
 	public static String getValue(PsiModifierListOwner element, String defaultValue, String... annotationTypes)
 	{
 		return PsiHelper.getAnnotationAttributeValue(
+				PsiHelper.findFirstAnnotation(element, annotationTypes),
+				"value",
+				defaultValue
+		);
+	}
+	
+	public static @NotNull List<String> getValues(PsiModifierListOwner element, List<String> defaultValue, String... annotationTypes)
+	{
+		return PsiHelper.getAnnotationAttributeValueList(
 				PsiHelper.findFirstAnnotation(element, annotationTypes),
 				"value",
 				defaultValue
