@@ -47,7 +47,7 @@ public class FlowguiInspection
 				{
 					case "root" ->
 					{
-						inspectTag(tag, model, model.findSpec(HL_EMPTY), HL_EMPTY, holder);
+						inspectTag(tag, model.findSpec(HL_EMPTY), holder);
 						return;
 					}
 					case "import" ->
@@ -75,7 +75,9 @@ public class FlowguiInspection
 							}
 						}
 						
-						inspectTag(tag, model, model.findSpec(HL_EMPTY), HL_EMPTY, holder);
+						var spec = model.findSpec(HL_EMPTY);
+						if(spec == null) return;
+						inspectTag(tag, spec, holder);
 						return;
 					}
 				}
@@ -95,12 +97,12 @@ public class FlowguiInspection
 				var spec = model.findSpec(clazz);
 				if(spec == null) return;
 				
-				inspectTag(tag, model, spec, clazz, holder);
+				inspectTag(tag, spec, holder);
 			}
 		};
 	}
 	
-	protected void inspectTag(XmlTag tag, FlowguiModel model, FlowguiComponentSpec spec, String clazz, ProblemsHolder holder)
+	protected void inspectTag(XmlTag tag, @NotNull FlowguiComponentSpec spec, ProblemsHolder holder)
 	{
 		Map<String, String> missingFields = new LinkedHashMap<>();
 		

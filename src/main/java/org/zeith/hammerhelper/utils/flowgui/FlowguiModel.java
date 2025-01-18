@@ -98,8 +98,9 @@ public class FlowguiModel
 		PsiClass readerAnnotation = facade.findClass("org.zeith.hammerlib.client.flowgui.reader.FlowguiReader", scope);
 		if(readerAnnotation == null) return model;
 		
-		for(PsiReference pr : ReferencesSearch.search(readerAnnotation).allowParallelProcessing())
+		for(PsiReference pr : ReferencesSearch.search(readerAnnotation))
 		{
+			if(pr == null) continue;
 			if(!(pr.getElement() instanceof PsiJavaCodeReferenceElement jcre)) continue;
 			if(!(jcre.getParent() instanceof PsiAnnotation annotation)) continue;
 			String identifier = PsiHelper.getAnnotationAttributeValue(annotation, "value", "");
