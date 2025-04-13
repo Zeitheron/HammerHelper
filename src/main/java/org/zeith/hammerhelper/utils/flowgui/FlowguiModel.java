@@ -1,6 +1,5 @@
 package org.zeith.hammerhelper.utils.flowgui;
 
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.openapi.util.Key;
 import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -9,8 +8,7 @@ import com.intellij.psi.util.PsiUtil;
 import com.intellij.psi.xml.XmlTag;
 import com.intellij.util.ProcessingContext;
 import org.jetbrains.annotations.NotNull;
-import org.zeith.hammerhelper.utils.PsiHelper;
-import org.zeith.hammerhelper.utils.ResourceLocation;
+import org.zeith.hammerhelper.utils.*;
 import org.zeith.hammerhelper.utils.hlide.HammerLibIDE;
 
 import java.util.*;
@@ -83,10 +81,12 @@ public class FlowguiModel
 		if(flowguiTags != null)
 			for(PsiField field : flowguiTags.getFields())
 			{
-				if(field.getName().startsWith("COM_")
-				   && field.hasModifier(JvmModifier.STATIC)
-				   && field.hasModifier(JvmModifier.FINAL)
-				   && field.getType().equalsToText("java.lang.String")
+				var mods = field.getModifierList();
+				if(mods != null
+						&& field.getName().startsWith("COM_")
+						&& mods.hasExplicitModifier(PsiModifier.STATIC)
+						&& mods.hasExplicitModifier(PsiModifier.FINAL)
+						&& field.getType().equalsToText("java.lang.String")
 				)
 				{
 					String tagType = field.getName().substring(4);
@@ -98,7 +98,7 @@ public class FlowguiModel
 		PsiClass readerAnnotation = facade.findClass("org.zeith.hammerlib.client.flowgui.reader.FlowguiReader", scope);
 		if(readerAnnotation == null) return model;
 		
-		for(PsiReference pr : ReferencesSearch.search(readerAnnotation))
+		for(PsiReference pr : ReferencesSearch.search(readerAnnotation).findAll())
 		{
 			if(pr == null) continue;
 			if(!(pr.getElement() instanceof PsiJavaCodeReferenceElement jcre)) continue;

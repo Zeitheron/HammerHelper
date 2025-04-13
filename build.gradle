@@ -53,7 +53,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("243")
-        untilBuild.set("999.*")
+        untilBuild.set("251.*")
         changeNotes.set(file("CHANGELOG.html").text)
     }
 
@@ -65,5 +65,23 @@ tasks {
 
     publishPlugin {
         token = System.getenv("JETBRAINS_MARKETPLACE_TOKEN")
+    }
+}
+
+import org.jetbrains.intellij.platform.gradle.IntelliJPlatformType
+import org.jetbrains.intellij.platform.gradle.models.ProductRelease
+
+intellijPlatform {
+    pluginVerification {
+        ides {
+            ide IntelliJPlatformType.IntellijIdeaCommunity, "251.23774.318"
+            recommended()
+            select {
+                it.types = [IntelliJPlatformType.IntellijIdeaCommunity]
+                it.channels = [ProductRelease.Channel.RC]
+                it.sinceBuild = '243'
+                it.untilBuild = '251.*'
+            }
+        }
     }
 }

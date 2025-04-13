@@ -1,7 +1,6 @@
 package org.zeith.hammerhelper.inspections.classes.packets;
 
 import com.intellij.codeInspection.*;
-import com.intellij.lang.jvm.JvmModifier;
 import com.intellij.psi.*;
 import org.jetbrains.annotations.NotNull;
 import org.zeith.hammerhelper.utils.PsiHelper;
@@ -31,7 +30,8 @@ public class UnserializedPacketData
 				Map<String, PsiField> lookup = new HashMap<>();
 				for(PsiField field : aClass.getFields())
 				{
-					if(field.hasModifier(JvmModifier.FINAL) || field.hasModifier(JvmModifier.STATIC) || Arrays.stream(field.getAnnotations()).anyMatch(p ->
+					var mods = field.getModifierList();
+					if(mods == null || mods.hasExplicitModifier(PsiModifier.FINAL) || mods.hasExplicitModifier(PsiModifier.STATIC) || Arrays.stream(field.getAnnotations()).anyMatch(p ->
 							p.getQualifiedName() != null
 							&& IGNORES.stream().anyMatch(p.getQualifiedName().toLowerCase(Locale.ROOT)::contains)
 					)) continue;

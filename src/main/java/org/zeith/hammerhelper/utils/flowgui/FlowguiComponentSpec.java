@@ -1,10 +1,7 @@
 package org.zeith.hammerhelper.utils.flowgui;
 
-import com.intellij.lang.jvm.JvmModifier;
-import com.intellij.psi.PsiClass;
-import com.intellij.psi.PsiField;
-import org.zeith.hammerhelper.utils.PsiHelper;
-import org.zeith.hammerhelper.utils.ResourceLocation;
+import com.intellij.psi.*;
+import org.zeith.hammerhelper.utils.*;
 
 import java.util.*;
 
@@ -16,11 +13,13 @@ public record FlowguiComponentSpec(PsiClass owner, ResourceLocation id, Map<Stri
 		
 		for(PsiField f : psi.getAllFields())
 		{
-			if(!f.hasModifier(JvmModifier.PUBLIC)
-			   || !f.hasModifier(JvmModifier.STATIC)
-			   || !f.hasModifier(JvmModifier.FINAL)
-			   || !f.getType().equalsToText("java.lang.String")
-			   || !f.getName().startsWith("KEY_")
+			var mods = f.getModifierList();
+			if(mods == null
+					|| !mods.hasExplicitModifier(PsiModifier.PUBLIC)
+					|| !mods.hasExplicitModifier(PsiModifier.STATIC)
+					|| !mods.hasExplicitModifier(PsiModifier.FINAL)
+					|| !f.getType().equalsToText("java.lang.String")
+					|| !f.getName().startsWith("KEY_")
 			) continue;
 			
 			var xmlName = PsiHelper.getExpressionStringRepresentation(f.getInitializer(), "");

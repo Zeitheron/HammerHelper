@@ -48,10 +48,7 @@ public class ConvertClassToInterfaceFix
 			final SearchScope searchScope = interfaceClass.getUseScope();
 			final List<PsiClass> elements = new ArrayList<>();
 			elements.add(interfaceClass);
-			for(final PsiClass inheritor : ClassInheritorsSearch.search(interfaceClass, searchScope, false))
-			{
-				elements.add(inheritor);
-			}
+			elements.addAll(ClassInheritorsSearch.search(interfaceClass, searchScope, false).findAll());
 			return ModCommand.psiUpdate(interfaceClass, (cls, updater) ->
 					{
 						moveSubClassExtendsToImplements(ContainerUtil.map(elements, updater::getWritable));

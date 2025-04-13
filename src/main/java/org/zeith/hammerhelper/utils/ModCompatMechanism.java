@@ -53,7 +53,7 @@ public class ModCompatMechanism
 		
 		Map<String, PsiClass> register = new HashMap<>();
 		
-		for(PsiReference pr : ReferencesSearch.search(mod).allowParallelProcessing())
+		for(PsiReference pr : ReferencesSearch.search(mod).allowParallelProcessing().findAll())
 		{
 			if(!(pr.getElement() instanceof PsiJavaCodeReferenceElement jcre)) continue;
 			if(!(jcre.getParent() instanceof PsiAnnotation annotation)) continue;
