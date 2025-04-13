@@ -53,7 +53,7 @@ tasks {
 
     patchPluginXml {
         sinceBuild.set("243")
-        //untilBuild.set("244.*")
+        untilBuild.set("999.*")
         changeNotes.set(file("CHANGELOG.html").text)
     }
 
